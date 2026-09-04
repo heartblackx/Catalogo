@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   patch-catalog:
-    if: github.event.head_commit.message == 'chore: apply catalog media cleanup workflow'
+    if: github.event.head_commit.message == 'chore: rerun catalog media cleanup workflow'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,82 +22,34 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
-
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          original = s
-
-          # Remove social-preview references hosted under the Concordia domain.
-          s = re.sub(r'\n<meta property="og:image" content="https://grupoconcordia\.info/[^"]+">', '', s)
-          s = re.sub(r'\n<meta property="og:image:alt" content="[^"]+">', '', s)
-          s = re.sub(r'\n<meta name="twitter:image" content="https://grupoconcordia\.info/[^"]+">', '', s)
-          s = s.replace('<meta name="twitter:card" content="summary_large_image">', '<meta name="twitter:card" content="summary">')
-
-          # Exact public label requested for development-level fallback photos.
-          s = s.replace('Imagen real del desarrollo', 'Imagen del desarrollo')
-
-          # Do not use unreviewed Google Sites imagery as a fallback. A fallback must
-          # come from the development media collection tied to that development.
-          old_fallback = 'const developmentPhoto=model.cover || model.siteImage || "";'
-          new_fallback = 'const developmentPhoto=model.cover || "";'
-          if old_fallback not in s:
-              raise SystemExit('Expected development fallback line was not found')
-          s = s.replace(old_fallback, new_fallback, 1)
-
-          # Add the same explicit fallback label inside development lot cards.
-          old_photo_line = '    const photo=getLotPhoto(l,m).url;'
-          new_photo_line = '    const photoInfo=getLotPhoto(l,m);\n    const photo=photoInfo.url;'
-          if old_photo_line not in s:
-              raise SystemExit('Expected development-lot photo line was not found')
-          s = s.replace(old_photo_line, new_photo_line, 1)
-
-          old_mlot = '''      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="Foto del lote ${esc(l.lote||"")}" loading="lazy">`:`<div class="mlot-photo-placeholder"><div><b>📷 Foto del lote</b><span>Espacio reservado para fotografía</span></div></div>`}</div>'''
-          new_mlot = '''      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>Sin fotografía propia ni imagen del desarrollo revisada.</span></div></div>`}</div>'''
-          if old_mlot not in s:
-              raise SystemExit('Expected development-lot markup was not found')
-          s = s.replace(old_mlot, new_mlot, 1)
-
-          # Offices: keep the location links but expose only the Vive La Baja name.
-          start = s.find('function cleanOfficeName(name=""){')
-          end = s.find('\nconst state = {', start)
-          if start == -1 or end == -1:
-              raise SystemExit('Office rendering block was not found')
-          office_block = r'''function stripOfficeText(value=""){
-  return String(value||"")
-    .replace(/grupo\s+concordia/ig,"")
-    .replace(/concordia/ig,"")
-    .replace(/\s+/g," ").trim();
-}
-function renderOffices(){
-  const grid=document.getElementById("officeGrid");
-  const count=document.getElementById("officeCount");
-  if(!grid)return;
-  const list=Array.isArray(state.offices)?state.offices:[];
-  if(count)count.textContent="Vive La Baja";
-  if(!list.length){
-    grid.innerHTML=`<div class="office-empty">Vive La Baja · ubicación por confirmar.</div>`;
-    return;
-  }
-  grid.innerHTML=list.map(o=>{
-    const ref=stripOfficeText(o.zona||o.direccion||"").replace(/_/g," ");
-    const link=o.maps_url||"";
-    return `<article class="office-card"><span class="office-label">Vive La Baja</span><h3>Vive La Baja</h3>${ref?`<p>${esc(ref)}</p>`:""}${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span>↗</span></a>`:`<span class="office-empty">Liga por confirmar</span>`}</article>`;
-  }).join("");
-}
-'''
-          s = s[:start] + office_block + s[end:]
-
-          # Guardrail: no public content may retain the Concordia domain/name.
-          visible_without_sanitizer = re.sub(r'function stripOfficeText\(value=""\)\{.*?\n\}', '', s, flags=re.S)
-          if 'grupoconcordia.info' in visible_without_sanitizer.lower():
-              raise SystemExit('A grupoconcordia.info reference remains')
-
-          if s == original:
-              raise SystemExit('No changes were produced')
-          p.write_text(s, encoding='utf-8')
+          import re, base64
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          original=s
+          s=re.sub(r'\n<meta property="og:image" content="https://grupoconcordia\.info/[^"]+">','',s)
+          s=re.sub(r'\n<meta property="og:image:alt" content="[^"]+">','',s)
+          s=re.sub(r'\n<meta name="twitter:image" content="https://grupoconcordia\.info/[^"]+">','',s)
+          s=s.replace('<meta name="twitter:card" content="summary_large_image">','<meta name="twitter:card" content="summary">')
+          s=s.replace('Imagen real del desarrollo','Imagen del desarrollo')
+          old='const developmentPhoto=model.cover || model.siteImage || "";'
+          if old not in s: raise SystemExit('development fallback not found')
+          s=s.replace(old,'const developmentPhoto=model.cover || "";',1)
+          old='    const photo=getLotPhoto(l,m).url;'
+          if old not in s: raise SystemExit('development lot photo line not found')
+          s=s.replace(old,'    const photoInfo=getLotPhoto(l,m);\n    const photo=photoInfo.url;',1)
+          old='      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="Foto del lote ${esc(l.lote||"")}" loading="lazy">`:`<div class="mlot-photo-placeholder"><div><b>📷 Foto del lote</b><span>Espacio reservado para fotografía</span></div></div>`}</div>'
+          new='      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>Sin fotografía propia ni imagen del desarrollo revisada.</span></div></div>`}</div>'
+          if old not in s: raise SystemExit('development lot markup not found')
+          s=s.replace(old,new,1)
+          start=s.find('function cleanOfficeName(name=""){')
+          end=s.find('\nconst state = {',start)
+          if start<0 or end<0: raise SystemExit('office block not found')
+          office=base64.b64decode('ZnVuY3Rpb24gc3RyaXBPZmZpY2VUZXh0KHZhbHVlPSIiKXsKICByZXR1cm4gU3RyaW5nKHZhbHVlfHwiIikKICAgIC5yZXBsYWNlKC9ncnVwb1xzK2NvbmNvcmRpYS9pZywiIikKICAgIC5yZXBsYWNlKC9jb25jb3JkaWEvaWcsIiIpCiAgICAucmVwbGFjZSgvXHMrL2csIiAiKS50cmltKCk7Cn0KZnVuY3Rpb24gcmVuZGVyT2ZmaWNlcygpewogIGNvbnN0IGdyaWQ9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoIm9mZmljZUdyaWQiKTsKICBjb25zdCBjb3VudD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgib2ZmaWNlQ291bnQiKTsKICBpZighZ3JpZClyZXR1cm47CiAgY29uc3QgbGlzdD1BcnJheS5pc0FycmF5KHN0YXRlLm9mZmljZXMpP3N0YXRlLm9mZmljZXM6W107CiAgaWYoY291bnQpY291bnQudGV4dENvbnRlbnQ9IlZpdmUgTGEgQmFqYSI7CiAgaWYoIWxpc3QubGVuZ3RoKXsKICAgIGdyaWQuaW5uZXJIVE1MPWA8ZGl2IGNsYXNzPSJvZmZpY2UtZW1wdHkiPlZpdmUgTGEgQmFqYSDCtyB1YmljYWNpw7NuIHBvciBjb25maXJtYXIuPC9kaXY+YDsKICAgIHJldHVybjsKICB9CiAgZ3JpZC5pbm5lckhUTUw9bGlzdC5tYXAobz0+ewogICAgY29uc3QgcmVmPXN0cmlwT2ZmaWNlVGV4dChvLnpvbmF8fG8uZGlyZWNjaW9ufHwiIikucmVwbGFjZSgvXy9nLCIgIik7CiAgICBjb25zdCBsaW5rPW8ubWFwc191cmx8fCIiOwogICAgcmV0dXJuIGA8YXJ0aWNsZSBjbGFzcz0ib2ZmaWNlLWNhcmQiPjxzcGFuIGNsYXNzPSJvZmZpY2UtbGFiZWwiPlZpdmUgTGEgQmFqYTwvc3Bhbj48aDM+Vml2ZSBMYSBCYWphPC9oMz4ke3JlZj9gPHA+JHtlc2MocmVmKX08L3A+YDoiIn0ke2xpbms/YDxhIGhyZWY9IiR7ZXNjKGxpbmspfSIgdGFyZ2V0PSJfYmxhbmsiIHJlbD0ibm9vcGVuZXIgbm9yZWZlcnJlciI+QWJyaXIgZW4gR29vZ2xlIE1hcHMgPHNwYW4+4oaXPC9zcGFuPjwvYT5gOmA8c3BhbiBjbGFzcz0ib2ZmaWNlLWVtcHR5Ij5MaWdhIHBvciBjb25maXJtYXI8L3NwYW4+YH08L2FydGljbGU+YDsKICB9KS5qb2luKCIiKTsKfQo=').decode()
+          s=s[:start]+office+s[end:]
+          if 'grupoconcordia.info' in s.lower(): raise SystemExit('Concordia domain remains')
+          if s==original: raise SystemExit('no changes')
+          p.write_text(s,encoding='utf-8')
           PY
-
       - name: Validate inline JavaScript
         shell: bash
         run: |
@@ -105,12 +57,11 @@ function renderOffices(){
           from pathlib import Path
           import re
           html=Path('index.html').read_text(encoding='utf-8')
-          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S|re.I)
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',html,flags=re.S|re.I)
           js='\n'.join(x for x in scripts if not x.lstrip().startswith('{'))
-          Path('/tmp/catalog-inline.js').write_text(js, encoding='utf-8')
+          Path('/tmp/catalog-inline.js').write_text(js,encoding='utf-8')
           PY
           node --check /tmp/catalog-inline.js
-
       - name: Commit catalog changes
         shell: bash
         run: |
