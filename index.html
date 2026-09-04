@@ -371,9 +371,9 @@ img{display:block;max-width:100%}
 .dev:nth-child(3n+1){grid-column:span 7}
 .dev:nth-child(3n+2){grid-column:span 5}
 .dev-photo{position:relative;height:275px;background:linear-gradient(135deg,#1a5362,#0b2835);overflow:hidden}
-.dev-photo img{width:100%;height:100%;object-fit:cover;transition:.4s ease}
-.dev:hover .dev-photo img{transform:scale(1.035)}
-.dev-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(4,18,25,.78),rgba(4,18,25,.02) 62%)}
+.dev-photo img{width:100%;height:100%;object-fit:cover;filter:none!important;opacity:1!important;mix-blend-mode:normal!important;transition:none}
+.dev:hover .dev-photo img{transform:none}
+.dev-photo:after{display:none}
 .badges{position:absolute;z-index:3;left:16px;right:16px;top:16px;display:flex;justify-content:space-between;gap:8px}
 .badge{
   padding:7px 10px;border-radius:999px;color:#fff;background:rgba(6,26,35,.62);
@@ -387,6 +387,11 @@ img{display:block;max-width:100%}
 .dev-title small{display:block;text-transform:uppercase;letter-spacing:.13em;font-size:.67rem;color:#d7e3e7;font-weight:800}
 .dev-title strong{display:block;margin-top:5px;font-size:1.6rem;letter-spacing:-.02em}
 .dev-body{padding:22px 23px 23px;display:flex;flex-direction:column;flex:1}
+.dev-summary{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.dev-heading{min-width:0}.dev-type{display:inline-block;color:#0f6f75;text-transform:uppercase;letter-spacing:.11em;font-size:.65rem;font-weight:900}
+.dev-heading h3{margin:5px 0 2px;font-size:1.45rem;letter-spacing:-.025em;line-height:1.05}.dev-zone{margin:0;color:#758188;font-size:.78rem}
+.dev-availability{flex:none;padding:7px 10px;border-radius:999px;background:#e4f4ee;color:#197254;font-size:.67rem;font-weight:900;white-space:nowrap}.dev-availability.off{background:#f3ebe2;color:#7c6551}
+
 .dev-desc{color:#637078;line-height:1.58;margin:0;min-height:75px}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin:15px 0}
 .chip{
@@ -502,12 +507,14 @@ img{display:block;max-width:100%}
   background:rgba(7,27,36,.72);color:#fff;font-size:1.2rem;backdrop-filter:blur(8px)
 }
 .modal-hero{height:390px;position:relative;background:#123947;overflow:hidden}
-.modal-hero img{width:100%;height:100%;object-fit:cover}
-.modal-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(5,19,26,.85),transparent 68%)}
+.modal-hero img{width:100%;height:100%;object-fit:cover;filter:none!important;opacity:1!important;mix-blend-mode:normal!important}
+.modal-hero:after{display:none}
 .modal-title{position:absolute;z-index:2;left:34px;right:70px;bottom:28px;color:#fff}
 .modal-title small{text-transform:uppercase;letter-spacing:.14em;color:#bfe6e1;font-weight:800;font-size:.72rem}
 .modal-title h2{margin:6px 0 0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.045em;line-height:.96}
 .modal-content{padding:30px}
+.modal-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin:0 0 22px}.modal-heading small{display:block;color:#0f777c;text-transform:uppercase;letter-spacing:.13em;font-size:.68rem;font-weight:900}.modal-heading h2{margin:6px 0 0;font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.045em;line-height:.98}.modal-heading .modal-zone{color:#728087;font-size:.86rem;text-align:right}
+
 .modal-top{display:grid;grid-template-columns:1.4fr .6fr;gap:24px}
 .info-panel,.location-panel{
   background:#fffdf9;border:1px solid #e4d9ca;border-radius:22px;padding:23px
@@ -525,7 +532,7 @@ img{display:block;max-width:100%}
 .modal-stat small{display:block;color:#858f94;font-size:.67rem}
 .modal-stat strong{display:block;margin-top:4px;font-size:.98rem}
 .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:155px;gap:8px;margin-top:22px}
-.gallery img{width:100%;height:100%;object-fit:cover;border-radius:15px}
+.gallery img{width:100%;height:100%;object-fit:cover;border-radius:15px;filter:none!important;opacity:1!important;mix-blend-mode:normal!important}
 .gallery img:first-child{grid-row:span 2}
 .modal-lots-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:30px 0 15px}
 .modal-lots-head h3{margin:0;font-size:1.5rem}
@@ -619,6 +626,7 @@ img{display:block;max-width:100%}
 .appointment-msg.error{color:#ffd0c7}
 .appointment-msg.success{color:#baf4d8}
 @media(max-width:680px){
+  .modal-heading{display:block}.modal-heading .modal-zone{text-align:left;margin-top:7px}.dev-summary{display:block}.dev-availability{display:inline-flex;margin-top:9px}
   .quote-summary{grid-template-columns:1fr 1fr}
   .finance-grid{grid-template-columns:1fr 1fr}
   .appointment-grid{grid-template-columns:1fr}
@@ -811,7 +819,7 @@ footer{padding:40px 0 48px}
         <a href="#oficinas" class="btn btn-glass">Oficinas y asesores</a>
       </div>
       <div class="hero-proof" aria-label="Elementos de confianza">
-        <span>✓ Inventario conectado</span><span>✓ USD / MXN</span><span>✓ Ubicaciones en Maps</span><span>✓ Atención por asesor</span>
+        <span>✓ Opciones disponibles</span><span>✓ USD / MXN</span><span>✓ Ubicaciones en Maps</span><span>✓ Atención por asesor</span>
       </div>
     </div>
 
@@ -838,7 +846,7 @@ footer{padding:40px 0 48px}
         <div>
           <div class="kicker">Resultados por enganche</div>
           <h2 id="searchResultsTitle">Terrenos que se ajustan a tu enganche</h2>
-          <p id="searchResultsText">Ingresa cuánto puedes dar de enganche y te mostraremos lotes reales del inventario.</p>
+          <p id="searchResultsText">Ingresa cuánto puedes dar de enganche y te mostraremos opciones que se ajusten a tu presupuesto.</p>
         </div>
         <div class="search-results-badge" id="searchResultsCount">0 resultados</div>
       </div>
@@ -854,9 +862,9 @@ footer{padding:40px 0 48px}
       <div>
         <div class="kicker">Invierte Inteligente TJ</div>
         <h2>Desarrollos para invertir con confianza</h2>
-        <p class="lead">En Invierte Inteligente TJ te ayudamos a comparar opciones con información clara, revisar disponibilidad real y conectar directamente con un asesor para cotizar el terreno que mejor se ajuste a tu presupuesto.</p>
+        <p class="lead">En Invierte Inteligente TJ te ayudamos a comparar opciones con información clara, consultar disponibilidad y conectar directamente con un asesor para cotizar el terreno que mejor se ajuste a tu presupuesto.</p>
       </div>
-      <div class="headnote">Consulta amenidades y disponibilidad en un solo lugar. Para evitar espacios vacíos, las imágenes de los desarrollos se cargan desde la galería sincronizada en Supabase.</div>
+      <div class="headnote">Consulta amenidades, ubicación y disponibilidad de los desarrollos en un solo lugar.</div>
     </div>
 
     <div class="category-row" id="categoryRow">
@@ -867,7 +875,7 @@ footer{padding:40px 0 48px}
     </div>
 
     <div class="dev-grid" id="devGrid">
-      <div class="state"><div class="loader"></div>Cargando desarrollos desde el inventario…</div>
+      <div class="state"><div class="loader"></div>Cargando desarrollos…</div>
     </div>
   </div>
 </section>
@@ -876,11 +884,11 @@ footer{padding:40px 0 48px}
   <div class="container">
     <div class="head">
       <div>
-        <div class="kicker">Inventario en vivo</div>
+        <div class="kicker">Terrenos disponibles</div>
         <h2>Lotes disponibles</h2>
         <p class="lead">Cada lote muestra la información que necesitas para decidir si quieres cotizarlo: medida, porcentaje mínimo de enganche y si tiene talud. La cotización final se realiza directamente con un asesor.</p>
       </div>
-      <div class="headnote" id="lotCountText">Consultando inventario…</div>
+      <div class="headnote" id="lotCountText">Consultando disponibilidad…</div>
     </div>
     <div class="lots-grid" id="lotsGrid">
       <div class="state"><div class="loader"></div>Cargando lotes disponibles…</div>
@@ -909,15 +917,15 @@ footer{padding:40px 0 48px}
       <div>
         <div class="kicker">Atención inmobiliaria</div>
         <h2>Información clara y personas reales para atenderte</h2>
-        <p>Consulta disponibilidad, compara opciones y agenda una cita. La información comercial se muestra desde la base vigente y un asesor confirma los detalles de tu operación.</p>
+        <p>Consulta disponibilidad, compara opciones y agenda una cita. Un asesor puede ayudarte a resolver dudas y confirmar las condiciones de tu operación.</p>
       </div>
       <a class="trust-map-cta" href="#oficinas">Ver oficinas de atención <span>→</span></a>
     </div>
     <div class="trust-grid">
-      <article><span class="trust-icon">↻</span><strong>Inventario actualizado</strong><p>Los lotes y su disponibilidad se consultan desde el inventario conectado al catálogo.</p></article>
+      <article><span class="trust-icon">↻</span><strong>Opciones disponibles</strong><p>Consulta los terrenos disponibles y compara sus características antes de cotizar.</p></article>
       <article><span class="trust-icon">$</span><strong>Cotiza en USD o MXN</strong><p>Compara enganche, saldo, mensualidad y plazo antes de solicitar atención.</p></article>
       <article><span class="trust-icon">⌖</span><strong>Ubicaciones reales</strong><p>Los desarrollos y oficinas con liga registrada abren directamente en Google Maps.</p></article>
-      <article><span class="trust-icon">✓</span><strong>Seguimiento personal</strong><p>Las citas se asignan a un asesor para continuar el proceso y confirmar condiciones.</p></article>
+      <article><span class="trust-icon">✓</span><strong>Seguimiento personal</strong><p>Un asesor puede acompañarte para resolver dudas y confirmar las condiciones de tu terreno.</p></article>
     </div>
   </div>
 </section>
@@ -954,9 +962,9 @@ footer{padding:40px 0 48px}
         <h2>Oficinas Vive La Baja</h2>
         <p>Consulta nuestros puntos de atención Vive La Baja y abre la ubicación directamente en Google Maps.</p>
       </div>
-      <div class="office-count" id="officeCount">Cargando ubicaciones…</div>
+      <div class="office-count" id="officeCount">Ubicaciones</div>
     </div>
-    <div class="office-grid" id="officeGrid"><div class="office-empty">Consultando oficinas registradas…</div></div>
+    <div class="office-grid" id="officeGrid"><div class="office-empty">Cargando oficinas…</div></div>
   </div>
 </section>
 
@@ -1049,7 +1057,7 @@ const CATALOG = [
   },
   {
     id:"andares", name:"Andares de Santa Fe", members:["Andares de Santa Fe"], priceNames:["Andares de Santa Fe"], siteImage:"https://lh3.googleusercontent.com/sitesv/AG8ngQUi60tg91AGVtCMOt-kceskgPmWZm8pjEoNGR6FGSnhBwNbGtOf8ditYCOgt-fqe-B8pUk1nNXJHQsmiOr8fSL_Bo_Vnhb6w02XHpJpfBgX_Q0w-t8pYnmVCEiohUFZ_vXOQawdElPk-T0dQQngn3hyOT3xaOIDe1A7iCVFjAtYoOY6f2lmulOqXm3IRYQ=w16383", type:"urbano",
-    description:"Proyecto residencial consolidado. El catálogo original lo presenta como un desarrollo sin disponibilidad, por lo que el estado visible se valida contra el inventario actual.",
+    description:"Proyecto residencial consolidado para quienes buscan una opción patrimonial en una zona urbana con buena conectividad.",
     amenities:["Proyecto consolidado"]
   },
   {
@@ -1599,27 +1607,22 @@ function renderDevelopments(models){
   }
   grid.innerHTML=models.map(m=>{
     const zone=m.zones[0] || m.loc?.zona || "Zona por confirmar";
+    const typeLabel=m.type==="costa"?"Costa":m.type==="campestre"?"Campestre":"Urbano";
     const availability=m.available.length
-      ? `<span class="badge live">${m.available.length} lotes disponibles</span>`
-      : `<span class="badge off">${m.lots.length ? "Sin disponibilidad" : "Inventario pendiente"}</span>`;
+      ? `${m.available.length} lotes disponibles`
+      : (m.lots.length ? "Disponibilidad por confirmar" : "Información por confirmar");
     const cover=m.cover
-      ? `<img src="${esc(m.cover)}" alt="" loading="lazy" onerror="devImageFallback(this)">`
-      : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#1a6570,#0a2d3a)"></div>`;
+      ? `<img src="${esc(m.cover)}" alt="${esc(m.name)}" loading="lazy" onerror="devImageFallback(this)">`
+      : `<div class="dev-photo-fallback"><strong>Imagen no disponible</strong></div>`;
     const mapDisabled=!m.loc?.maps_url;
     return `
       <article class="dev" data-id="${m.id}">
-        <div class="dev-photo"><div class="dev-photo-fallback"><span>Invierte Inteligente TJ</span><strong>Galería del desarrollo</strong><small>Imagen no disponible</small></div>
-          ${cover}
-          <div class="badges">
-            <span class="badge">${m.type==="costa"?"🌊 Costa":m.type==="campestre"?"🌿 Campestre":"🏙️ Urbano"}</span>
-            ${availability}
-          </div>
-          <div class="dev-title">
-            <small>${esc(zone)}</small>
-            <strong>${esc(m.name)}</strong>
-          </div>
-        </div>
+        <div class="dev-photo">${cover}</div>
         <div class="dev-body">
+          <div class="dev-summary">
+            <div class="dev-heading"><span class="dev-type">${esc(typeLabel)}</span><h3>${esc(m.name)}</h3><p class="dev-zone">${esc(zone)}</p></div>
+            <span class="dev-availability ${m.available.length?"":"off"}">${esc(availability)}</span>
+          </div>
           <p class="dev-desc">${esc(m.description)}</p>
           <div class="chips">${m.amenities.slice(0,4).map(a=>`<span class="chip">${esc(a)}</span>`).join("")}</div>
           <div class="dev-metrics">
@@ -1736,7 +1739,7 @@ function renderBudgetSearch(){
 
   if(!(downAvailable>0)){
     title.textContent="Indica cuánto puedes dar de enganche";
-    copy.textContent="Usaremos ese monto para comparar únicamente contra lotes con una regla comercial válida.";
+    copy.textContent="Usaremos ese monto para mostrarte opciones que se ajusten a tu presupuesto.";
     count.textContent="Sin búsqueda";
     grid.innerHTML=`<div class="search-empty" style="grid-column:1/-1"><strong>Falta el monto de enganche</strong>Escribe una cantidad y pulsa “Buscar terrenos”.</div>`;
     return;
@@ -1745,16 +1748,16 @@ function renderBudgetSearch(){
   const list=exact.length?exact:closest;
   if(exact.length){
     title.textContent=`Terrenos con enganche de hasta $${money(downAvailable)} USD`;
-    copy.textContent="Resultados calculados con superficie del lote y la tabla comercial vigente. Se muestran primero los que aprovechan mejor tu presupuesto.";
+    copy.textContent="Te mostramos primero las opciones que mejor se ajustan a tu presupuesto.";
     count.textContent=`${exact.length} coincidencias`;
   }else{
     title.textContent=`No encontramos lotes con enganche de $${money(downAvailable)} USD`;
-    copy.textContent="Estas son las opciones más cercanas por encima de tu monto. No alteramos precios ni porcentajes para forzar una coincidencia.";
+    copy.textContent="Estas son las opciones disponibles más cercanas por encima de tu monto.";
     count.textContent=closest.length?`${closest.length} opciones cercanas`:"0 resultados";
   }
 
   if(!list.length){
-    grid.innerHTML=`<div class="search-empty" style="grid-column:1/-1"><strong>No hay opciones calculables en esta zona</strong>Prueba otra zona o un monto distinto.</div>`;
+    grid.innerHTML=`<div class="search-empty" style="grid-column:1/-1"><strong>No hay opciones disponibles en esta zona</strong>Prueba otra zona o un monto distinto.</div>`;
     return;
   }
 
@@ -1824,7 +1827,7 @@ function renderDevelopmentToolbar(){
   if(!el)return;
   const f=developmentFilters;
   el.innerHTML=`
-    <div class="df-title"><strong>Filtra los lotes</strong><span>Los cálculos usan precios comerciales vigentes</span></div>
+    <div class="df-title"><strong>Filtra los lotes</strong><span>Ajusta los filtros para comparar opciones</span></div>
     <div class="df-grid">
       <div class="df-group"><span class="df-label">Mensualidad (${f.currency})</span><div class="df-inputs">
         <input class="df-input" inputmode="decimal" placeholder="Desde" value="${esc(f.monthlyMin)}" oninput="setDevelopmentFilter('monthlyMin',this.value)">
@@ -1916,16 +1919,18 @@ function openDevelopment(id){
   const zone=m.zones[0] || m.loc?.zona || "Zona por confirmar";
   const address=m.loc?.direccion || "Consulta la ubicación desde el botón de mapa.";
   const cover=m.cover || "";
-  const gallery=m.media.slice(0,5).map(x=>`<img src="${esc(x.public_url)}" alt="" loading="lazy" onerror="devImageFallback(this)">`).join("");
+  const typeLabel=m.type==="costa"?"Costa":m.type==="campestre"?"Campestre":"Urbano";
+  const gallery=m.media.slice(0,5).map(x=>`<img src="${esc(x.public_url)}" alt="${esc(m.name)}" loading="lazy" onerror="devImageFallback(this)">`).join("");
   document.getElementById("modalBody").innerHTML=`
-    <div class="modal-hero">
-      ${cover?`<img src="${esc(cover)}" alt="" onerror="devImageFallback(this)">`:""}
-      <div class="modal-title"><small>${m.type.toUpperCase()} · ${esc(zone)}</small><h2 id="developmentTitle">${esc(m.name)}</h2></div>
-    </div>
+    <div class="modal-hero">${cover?`<img src="${esc(cover)}" alt="${esc(m.name)}" onerror="devImageFallback(this)">`:`<div class="dev-photo-fallback"><strong>Imagen no disponible</strong></div>`}</div>
     <div class="modal-content">
+      <div class="modal-heading">
+        <div><small>${esc(typeLabel)}</small><h2 id="developmentTitle">${esc(m.name)}</h2></div>
+        <div class="modal-zone">${esc(zone)}</div>
+      </div>
       <div class="modal-top">
         <div class="info-panel"><h3>Sobre el desarrollo</h3><p>${esc(m.description)}</p><div class="amenities">${m.amenities.map(a=>`<span class="amenity">✓ ${esc(a)}</span>`).join("")}</div></div>
-        <div class="location-panel"><h3>Ubicación</h3><p><strong>${esc(zone)}</strong><br>${esc(address)}</p>${m.loc?.maps_url?`<button class="devbtn" style="width:100%;margin-top:10px" onclick="openMap('${m.id}')">Abrir en Maps →</button>`:"<p><small>Ubicación aún no registrada en Supabase.</small></p>"}</div>
+        <div class="location-panel"><h3>Ubicación</h3><p><strong>${esc(zone)}</strong><br>${esc(address)}</p>${m.loc?.maps_url?`<button class="devbtn" style="width:100%;margin-top:10px" onclick="openMap('${m.id}')">Abrir en Maps →</button>`:"<p><small>Ubicación por confirmar.</small></p>"}</div>
       </div>
       <div class="modal-stats">
         <div class="modal-stat"><small>Lotes disponibles</small><strong>${m.available.length || "Consultar"}</strong></div>
@@ -1935,7 +1940,7 @@ function openDevelopment(id){
       </div>
       ${gallery?`<div class="gallery">${gallery}</div>`:""}
       <div id="developmentFilters" class="development-filters"></div>
-      <div class="modal-lots-head"><h3>Lotes disponibles</h3><span id="developmentLotCount">${m.available.length?`Mostrando ${m.available.length} de ${m.available.length}`:"Sin lotes disponibles registrados"}</span></div>
+      <div class="modal-lots-head"><h3>Lotes disponibles</h3><span id="developmentLotCount">${m.available.length?`${m.available.length} disponibles`:"Disponibilidad por confirmar"}</span></div>
       <div class="modal-lots" id="developmentLots"></div>
     </div>`;
   renderDevelopmentToolbar();
@@ -1985,10 +1990,10 @@ async function load(){
   }catch(err){
     console.error(err);
     document.getElementById("devGrid").innerHTML=`
-      <div class="state"><strong>No fue posible consultar Supabase desde esta vista.</strong><br>
-      El diseño está listo; al publicarlo en tu sitio volverá a intentar cargar el inventario automáticamente.</div>`;
-    document.getElementById("lotsGrid").innerHTML=`<div class="state">Inventario no disponible en esta vista previa.</div>`;
-    document.getElementById("lotCountText").textContent="No se pudo conectar al inventario";
+      <div class="state"><strong>No fue posible cargar los desarrollos en este momento.</strong><br>
+      Intenta nuevamente en unos momentos.</div>`;
+    document.getElementById("lotsGrid").innerHTML=`<div class="state">No fue posible cargar los lotes en este momento.</div>`;
+    document.getElementById("lotCountText").textContent="Disponibilidad no disponible por el momento";
   }
 }
 
