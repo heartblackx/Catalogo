@@ -835,13 +835,13 @@ footer{padding:40px 0 48px}
 </footer>
 
 
-<div class="quote-modal" id="quoteModal" aria-hidden="true">
-  <div class="quote-card" id="quoteContent"></div>
+<div class="quote-modal" id="quoteModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="quoteTitle">
+  <div class="quote-card" id="quoteContent" tabindex="-1"></div>
 </div>
 
-<div class="modal" id="devModal" aria-hidden="true">
-  <div class="modal-card" id="modalCard">
-    <button class="close" id="closeModal" aria-label="Cerrar">✕</button>
+<div class="modal" id="devModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="developmentTitle">
+  <div class="modal-card" id="modalCard" tabindex="-1">
+    <button class="close" id="closeModal" type="button" aria-label="Cerrar detalle del desarrollo">✕</button>
     <div id="modalBody"></div>
   </div>
 </div>
@@ -944,6 +944,7 @@ const CATALOG = [
 
 const APPOINTMENT_ENDPOINT="https://cisiancuphdkybkddwmq.supabase.co/functions/v1/agendar-cita-catalogo";
 let selectedQuote=null;
+let lastFocusedElement=null;
 
 function devImageFallback(img){
   img.style.display="none";
@@ -954,13 +955,20 @@ function quoteLot(modelId,lotId){
   const lot=model.available.find(x=>String(x.id)===String(lotId));
   if(!lot)return;
   selectedQuote={model,lot};
+  lastFocusedElement=document.activeElement;
   renderQuoteModal();
-  document.getElementById("quoteModal").classList.add("open");
+  const modal=document.getElementById("quoteModal");
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
   document.body.style.overflow="hidden";
+  document.getElementById("quoteContent").focus();
 }
 function closeQuoteModal(){
-  document.getElementById("quoteModal").classList.remove("open");
+  const modal=document.getElementById("quoteModal");
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden","true");
   document.body.style.overflow="";
+  if(lastFocusedElement?.isConnected) lastFocusedElement.focus();
 }
 function formatCurrency(v){
   if(!(Number(v)>0))return "Consultar";
@@ -1005,9 +1013,9 @@ function renderQuoteModal(){
     </div>`;
   document.getElementById("quoteContent").innerHTML=`
     <div class="quote-head">
-      <button class="quote-close" onclick="closeQuoteModal()">✕</button>
+      <button class="quote-close" type="button" aria-label="Cerrar cotización" onclick="closeQuoteModal()">✕</button>
       <small>Terreno seleccionado</small>
-      <h2>${esc(model.name)} · Lote ${esc(lot.lote||"—")}</h2>
+      <h2 id="quoteTitle">${esc(model.name)} · Lote ${esc(lot.lote||"—")}</h2>
       <p>La información del lote ya está cargada. Solo falta agendar tu visita.</p>
     </div>
     <div class="quote-body">
@@ -1022,13 +1030,13 @@ function renderQuoteModal(){
         <h3>Agenda tu cita</h3>
         <p>Completa estos 4 datos. Al confirmar, Supabase asignará automáticamente el siguiente asesor disponible en el turno Eduardo → Carlos → Eduardo → Carlos.</p>
         <div class="appointment-grid">
-          <div class="appointment-field"><label>Nombre</label><input id="citaNombre" maxlength="80" placeholder="Tu nombre completo"></div>
-          <div class="appointment-field"><label>Teléfono</label><input id="citaTelefono" inputmode="tel" maxlength="18" placeholder="664 000 0000"></div>
-          <div class="appointment-field"><label>Día</label><input id="citaFecha" type="date"></div>
-          <div class="appointment-field"><label>Hora</label><input id="citaHora" type="time"></div>
+          <div class="appointment-field"><label for="citaNombre">Nombre</label><input id="citaNombre" name="nombre" autocomplete="name" maxlength="80" placeholder="Tu nombre completo" required></div>
+          <div class="appointment-field"><label for="citaTelefono">Teléfono</label><input id="citaTelefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" maxlength="18" placeholder="664 000 0000" required></div>
+          <div class="appointment-field"><label for="citaFecha">Día</label><input id="citaFecha" name="fecha" type="date" required></div>
+          <div class="appointment-field"><label for="citaHora">Hora</label><input id="citaHora" name="hora" type="time" required></div>
         </div>
         <button class="appointment-submit" id="citaSubmit" type="submit">Confirmar cita</button>
-        <div class="appointment-msg" id="citaMsg"></div>
+        <div class="appointment-msg" id="citaMsg" role="status" aria-live="polite"></div>
       </form>
     </div>`;
   const today=new Date();
@@ -1063,6 +1071,13 @@ async function submitAppointment(e){
   if(faltan.length){
     msg.className="appointment-msg error";
     msg.textContent=`Falta completar: ${faltan.join(", ")}.`;
+    return;
+  }
+
+  const appointmentDate=new Date(`${fecha}T${hora}`);
+  if(Number.isNaN(appointmentDate.getTime()) || appointmentDate.getTime()<=Date.now()){
+    msg.className="appointment-msg error";
+    msg.textContent="Selecciona una fecha y hora futuras.";
     return;
   }
 
@@ -1158,6 +1173,13 @@ async function fetchAll(table, query, pageSize=1000){
 function related(name, members){
   const c=canon(name);
   return members.some(m=>canon(m)===c);
+}
+
+function isLotAvailable(lot){
+  if(lot.disponible === false) return false;
+  if(lot.disponible === true) return true;
+  const status=canon(lot.estatus);
+  return status==="disponible" || status.startsWith("disponible ") || status==="available";
 }
 
 function priceRowsForModel(model){
@@ -1268,7 +1290,7 @@ function modelMinDownAmount(model){
 function buildModels(){
   state.models = CATALOG.map(c=>{
     const lots=state.lots.filter(x=>related(x.desarrollo,c.members));
-    const available=lots.filter(x=>x.disponible===true || canon(x.estatus).includes("dispon"));
+    const available=lots.filter(isLotAvailable);
     const media=state.media
       .filter(x=>related(x.desarrollo,c.members) && x.activo!==false && x.public_url)
       .sort((a,b)=>(b.portada===true)-(a.portada===true)||(a.orden??99)-(b.orden??99));
@@ -1531,6 +1553,7 @@ function openDevelopment(id){
   const m=state.models.find(x=>x.id===id);
   if(!m) return;
   state.current=m;
+  lastFocusedElement=document.activeElement;
   const zone=m.zones[0] || m.loc?.zona || "Zona por confirmar";
   const address=m.loc?.direccion || "Consulta la ubicación desde el botón de mapa.";
   const cover=m.cover || "";
@@ -1542,7 +1565,7 @@ function openDevelopment(id){
       ${cover?`<img src="${esc(cover)}" alt="" onerror="devImageFallback(this)">`:""}
       <div class="modal-title">
         <small>${m.type.toUpperCase()} · ${esc(zone)}</small>
-        <h2>${esc(m.name)}</h2>
+        <h2 id="developmentTitle">${esc(m.name)}</h2>
       </div>
     </div>
     <div class="modal-content">
@@ -1598,6 +1621,7 @@ function openDevelopment(id){
   document.getElementById("devModal").setAttribute("aria-hidden","false");
   document.body.style.overflow="hidden";
   history.replaceState(null,"",`#${m.id}`);
+  document.getElementById("modalCard").focus();
 }
 
 function closeModal(){
@@ -1605,6 +1629,7 @@ function closeModal(){
   document.getElementById("devModal").setAttribute("aria-hidden","true");
   document.body.style.overflow="";
   if(location.hash && CATALOG.some(x=>`#${x.id}`===location.hash)) history.replaceState(null,"",location.pathname+location.search);
+  if(lastFocusedElement?.isConnected) lastFocusedElement.focus();
 }
 
 async function load(){
