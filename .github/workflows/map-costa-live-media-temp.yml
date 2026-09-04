@@ -1,0 +1,62 @@
+name: Map Costa live media temp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/map-costa-live-media-temp.yml
+
+permissions:
+  contents: read
+
+env:
+  SITE_URL: https://sites.google.com/view/invierte-inteligente-tj/p%C3%A1gina-principal/costa
+  PROVIDED_URL: https://lh3.googleusercontent.com/sitesv/AG8ngQXPPqVG_LNkfB8NeJUXmOJWZgHrjcVH3_9ZtXkv8qZ2mK7TPpsck-8O9VbGKFWjT7rfFgwKGkTlCwz8FxENUXFmjAh_CxsmObvpJ-8u6I4HUwrznkoSBOknCQsRvjzeCKUs7BaDJO3Rae6m5dPRNr1K1f3UJjq_FJs8Vi1nCjuYv7MMDVAOSgmsjM7KiP4=w16383
+
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch and map URLs to sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36' "$SITE_URL" -o /tmp/site.html
+          python - <<'PY'
+          import os,re,html,pathlib
+          raw=pathlib.Path('/tmp/site.html').read_text(encoding='utf-8',errors='ignore')
+          raw=html.unescape(raw).replace('\\u003d','=').replace('\\u0026','&').replace('\\/','/').replace('\\_','_')
+          names=['Sahara','Vistas de Puerto Nuevo','Cielo','Santorini','Puerto Escondido','Costa Dorada Perla','Villa Toscana']
+          # section spans
+          starts=[m.start() for m in re.finditer(r'<section\b',raw,re.I)]
+          starts.append(len(raw))
+          spans=[]
+          for a,b in zip(starts,starts[1:]):
+              sec=raw[a:b]
+              found=next((n for n in names if n.lower() in sec.lower()),'OTRO')
+              spans.append((a,b,found))
+          urls=[os.environ['PROVIDED_URL']]
+          matches=[]
+          for m in re.finditer(r'https://lh3\.googleusercontent\.com/sitesv/[A-Za-z0-9_\-=]+',raw):
+              u=m.group(0)
+              if u not in urls:
+                  urls.append(u); matches.append((u,m.start()))
+          posmap={u:p for u,p in matches}
+          rows=[]
+          for i,u in enumerate(urls,1):
+              if i==1:
+                  label='PROVIDED'
+              else:
+                  p=posmap.get(u,-1)
+                  label='OTRO'
+                  for a,b,n in spans:
+                      if a<=p<b: label=n; break
+              rows.append(f'{i:02d}\t{label}\t{u}')
+          pathlib.Path('MAP.tsv').write_text('\n'.join(rows),encoding='utf-8')
+          print('\n'.join(rows))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: costa-live-map
+          path: MAP.tsv
+          retention-days: 1
