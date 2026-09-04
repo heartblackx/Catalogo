@@ -13,12 +13,9 @@
 <meta property="og:title" content="Terrenos disponibles | Invierte Inteligente TJ">
 <meta property="og:description" content="Consulta lotes reales, compara financiamiento en USD o MXN y agenda atención con un asesor.">
 <meta property="og:url" content="https://catalogo.invierteinteligentetj.com/">
-<meta property="og:image" content="https://grupoconcordia.info/gcexperience/Banners/VillaParaiso-VLB.jpg">
-<meta property="og:image:alt" content="Terrenos disponibles en Baja California">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Terrenos disponibles | Invierte Inteligente TJ">
 <meta name="twitter:description" content="Lotes disponibles, cotización y atención inmobiliaria directa.">
-<meta name="twitter:image" content="https://grupoconcordia.info/gcexperience/Banners/VillaParaiso-VLB.jpg">
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
@@ -1237,7 +1234,7 @@ function renderQuoteModal(preserve=false){
       <p>Elige moneda, enganche y plazo para comparar el financiamiento.</p>
     </div>
     <div class="quote-body">
-      <div class="quote-photo-slot">${photo?`<img src="${esc(photo)}" alt="${quotePhotoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${quotePhotoInfo.type==="lote"?"Foto del lote":"Imagen real del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>El asesor puede compartir material real del desarrollo.</span></div></div>`}</div>
+      <div class="quote-photo-slot">${photo?`<img src="${esc(photo)}" alt="${quotePhotoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${quotePhotoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>El asesor puede compartir material real del desarrollo.</span></div></div>`}</div>
       <div class="quote-summary">
         <div class="qitem"><small>Manzana</small><strong>${esc(lot.manzana||"—")}</strong></div>
         <div class="qitem"><small>Lote</small><strong>${esc(lot.lote||"—")}</strong></div>
@@ -1366,29 +1363,26 @@ async function submitAppointment(e){
 }
 
 
-function cleanOfficeName(name=""){
-  let value=String(name||"")
+function stripOfficeText(value=""){
+  return String(value||"")
     .replace(/grupo\s+concordia/ig,"")
     .replace(/concordia/ig,"")
-    .replace(/^OFICINAS?\s+/i,"")
     .replace(/\s+/g," ").trim();
-  return value.toLowerCase().replace(/(^|\s|\(|-)\p{L}/gu,m=>m.toUpperCase());
 }
 function renderOffices(){
   const grid=document.getElementById("officeGrid");
   const count=document.getElementById("officeCount");
   if(!grid)return;
   const list=Array.isArray(state.offices)?state.offices:[];
-  if(count)count.textContent=list.length?`${list.length} ubicaciones registradas`:"Ubicaciones registradas";
+  if(count)count.textContent="Vive La Baja";
   if(!list.length){
-    grid.innerHTML=`<div class="office-empty">No fue posible cargar las oficinas en este momento. Puedes contactar directamente a Eduardo o Carlos desde la sección de asesores.</div>`;
+    grid.innerHTML=`<div class="office-empty">Vive La Baja · ubicación por confirmar.</div>`;
     return;
   }
   grid.innerHTML=list.map(o=>{
-    const name=cleanOfficeName(o.nombre||"Oficina");
-    const ref=o.zona?`Zona de referencia: ${String(o.zona).replace(/_/g," ")}`:`Referencia: ${name}`;
+    const ref=stripOfficeText(o.zona||o.direccion||"").replace(/_/g," ");
     const link=o.maps_url||"";
-    return `<article class="office-card"><span class="office-label">Vive La Baja</span><h3>${esc(name?`Oficina ${name}`:"Oficina de atención")}</h3><p>${esc(ref)}</p>${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span>↗</span></a>`:`<span class="office-empty">Liga por confirmar</span>`}</article>`;
+    return `<article class="office-card"><span class="office-label">Vive La Baja</span><h3>Vive La Baja</h3>${ref?`<p>${esc(ref)}</p>`:""}${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span>↗</span></a>`:`<span class="office-empty">Liga por confirmar</span>`}</article>`;
   }).join("");
 }
 
@@ -1649,7 +1643,7 @@ function getLotPhoto(lot,model){
   if(lm?.public_url) return {url:lm.public_url,type:"lote"};
   // Mientras no exista foto individual, usa únicamente una imagen REAL del desarrollo.
   // Prioridad: galería sincronizada de Supabase; respaldo: imagen real registrada en el catálogo.
-  const developmentPhoto=model.cover || model.siteImage || "";
+  const developmentPhoto=model.cover || "";
   if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};
   return {url:"",type:"ninguna"};
 }
@@ -1677,7 +1671,7 @@ function renderLots(){
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
     const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";
     const visual=photo
-      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen real del desarrollo"}</span></div>`
+      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
       : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
     return `
       <article class="lot">
@@ -1770,7 +1764,7 @@ function renderBudgetSearch(){
     const pct=price.ok&&Number(price.downPct)>0?`${money(price.downPct)}%`:"Consultar";
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
     const visual=photo
-      ? `<div class="search-lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="search-photo-label">${photoInfo.type==="lote"?"Foto del lote":"Imagen real del desarrollo"}</span></div>`
+      ? `<div class="search-lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="search-photo-label">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
       : `<div class="search-lot-photo no-photo"><div class="search-lot-no-photo"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía cargada</span></div></div></div>`;
 
     return `
@@ -1890,12 +1884,13 @@ function renderDevelopmentLots(){
     const p=resolvePrice(m,l),pct=p.ok&&Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
     const talud=l.tiene_talud===true?"Sí":l.tiene_talud===false?"No":"Consultar";
     const esquina=l.es_esquina===true?"Sí":l.es_esquina===false?"No":"Consultar";
-    const photo=getLotPhoto(l,m).url;
+    const photoInfo=getLotPhoto(l,m);
+    const photo=photoInfo.url;
     const plans=planOptionsForLot(m,l,{downPct:Number(developmentFilters.downPct)||0,term:Number(developmentFilters.term)||0});
     const monthly=plans.length?Math.min(...plans.map(x=>convertQuoteValue(x.monthly,developmentFilters.currency))):null;
     const monthlyText=Number.isFinite(monthly)?`$${new Intl.NumberFormat(developmentFilters.currency==="MXN"?"es-MX":"en-US",{maximumFractionDigits:2}).format(monthly)} ${developmentFilters.currency}`:"Consultar";
     return `<article class="mlot">
-      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="Foto del lote ${esc(l.lote||"")}" loading="lazy">`:`<div class="mlot-photo-placeholder"><div><b>📷 Foto del lote</b><span>Espacio reservado para fotografía</span></div></div>`}</div>
+      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>Sin fotografía propia ni imagen del desarrollo revisada.</span></div></div>`}</div>
       <div class="mlot-body">
         <div class="mlot-head"><div><strong>Lote ${esc(l.lote||"—")}</strong><div class="sub">${esc(m.name)} · Mz ${esc(l.manzana||"—")}</div></div>${l.es_esquina===true?`<span class="corner-badge">◆ ESQUINA</span>`:""}</div>
         <div class="mlot-grid">
