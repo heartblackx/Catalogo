@@ -1,0 +1,72 @@
+name: Patch catalog V18 photo fallback
+on:
+  push:
+    branches: ["assistant/catalog-v18-fotos-fallback"]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: assistant/catalog-v18-fotos-fallback
+      - name: Apply temporary real-photo fallback and public branding cleanup
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          old='''function getLotPhoto(lot,model){\n  const direct=lot.foto_lote_public_url || lot.foto_lote_url || lot.urlfoto;\n  if(direct) return {url:direct,type:"lote"};\n  const lm=model.lotMedia.find(x=>canon(x.manzana)===canon(lot.manzana)&&canon(x.lote)===canon(lot.lote)&&x.public_url);\n  if(lm?.public_url) return {url:lm.public_url,type:"lote"};\n  return {url:"",type:"ninguna"};\n}'''
+          new='''function getLotPhoto(lot,model){\n  const direct=lot.foto_lote_public_url || lot.foto_lote_url || lot.urlfoto;\n  if(direct) return {url:direct,type:"lote"};\n  const lm=model.lotMedia.find(x=>canon(x.manzana)===canon(lot.manzana)&&canon(x.lote)===canon(lot.lote)&&x.public_url);\n  if(lm?.public_url) return {url:lm.public_url,type:"lote"};\n  // Mientras no exista foto individual, usa únicamente una imagen REAL del desarrollo.\n  // Prioridad: galería sincronizada de Supabase; respaldo: imagen real registrada en el catálogo.\n  const developmentPhoto=model.cover || model.siteImage || "";\n  if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};\n  return {url:"",type:"ninguna"};\n}'''
+          if old not in s:
+              raise SystemExit('getLotPhoto block not found')
+          s=s.replace(old,new,1)
+
+          # Make the quote modal clearly identify a development photo so it never suggests it is the exact lot.
+          s=s.replace('''  const photo=getLotPhoto(lot,model).url;''','''  const quotePhotoInfo=getLotPhoto(lot,model);\n  const photo=quotePhotoInfo.url;''',1)
+          s=s.replace('''      <div class="quote-photo-slot">${photo?`<img src="${esc(photo)}" alt="Foto del lote" loading="lazy">`:`<div class="mlot-photo-placeholder"><div><b>📷 Foto del lote</b><span>Espacio reservado para fotografía</span></div></div>`}</div>''','''      <div class="quote-photo-slot">${photo?`<img src="${esc(photo)}" alt="${quotePhotoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${quotePhotoInfo.type==="lote"?"Foto del lote":"Imagen real del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>El asesor puede compartir material real del desarrollo.</span></div></div>`}</div>''',1)
+
+          # Public cards: use explicit wording that a fallback photo belongs to the development, not the exact lot.
+          s=s.replace('''${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}''','''${photoInfo.type==="lote"?"Foto del lote":"Imagen real del desarrollo"}''')
+
+          # Remove internal assignment language from public-facing lot cards.
+          s=s.replace('''          <div class="advisor-note">El asesor se asigna automáticamente al confirmar la cita.</div>\n''','')
+
+          # Public branding: keep office presentation only as Vive La Baja, never Concordia.
+          s=s.replace('Proyecto Grupo Concordia','Proyecto residencial')
+          s=s.replace('Proyecto Concordia','Proyecto residencial')
+          s=s.replace('Grupo Concordia','Vive La Baja')
+
+          # Sanitize any office name coming from the database before rendering.
+          s=s.replace('''  let value=String(name||"").replace(/^OFICINAS?\\s+/i,"").replace(/\\s+/g," ").trim();''','''  let value=String(name||"")\n    .replace(/grupo\\s+concordia/ig,"")\n    .replace(/concordia/ig,"")\n    .replace(/^OFICINAS?\\s+/i,"")\n    .replace(/\\s+/g," ").trim();''',1)
+          s=s.replace('''<span class="office-label">Oficina Vive La Baja</span><h3>${esc(name)}</h3>''','''<span class="office-label">Vive La Baja</span><h3>${esc(name?`Oficina ${name}`:"Oficina de atención")}</h3>''',1)
+
+          # Clarify office copy without exposing internal providers or backend wording to the prospect.
+          s=s.replace('''<p>Estas ubicaciones se cargan desde la base de oficinas registrada en Supabase. Pulsa una oficina para abrir su liga de Google Maps.</p>''','''<p>Consulta nuestros puntos de atención Vive La Baja y abre la ubicación directamente en Google Maps.</p>''',1)
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          scripts=[]
+          for attrs,body in re.findall(r'<script([^>]*)>(.*?)</script>',s,re.S|re.I):
+              if 'application/ld+json' in attrs.lower():
+                  continue
+              if body.strip(): scripts.append(body)
+          Path('/tmp/catalog-v18-inline.js').write_text('\n;\n'.join(scripts),encoding='utf-8')
+          PY
+          node --check /tmp/catalog-v18-inline.js
+          rm -f .github/workflows/patch-catalog-v18.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/patch-catalog-v18.yml
+          git commit -m "Use real development photos as lot fallback and clean office branding"
+          git push origin HEAD:assistant/catalog-v18-fotos-fallback
