@@ -689,6 +689,46 @@ footer{padding:40px 0 48px}
   .dev-actions{grid-template-columns:1fr}
   .mapbtn{width:100%}
 }
+
+/* === CATÁLOGO V16 · LOTES + FILTROS + MXN/USD === */
+.development-filters{
+  position:sticky;top:0;z-index:8;margin:22px 0 14px;padding:16px;border-radius:20px;
+  background:rgba(255,253,249,.96);border:1px solid #e2d6c7;box-shadow:0 12px 28px rgba(11,31,41,.08);
+  backdrop-filter:blur(12px)
+}
+.df-title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+.df-title strong{font-size:1rem}.df-title span{font-size:.72rem;color:#738087}
+.df-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.35fr;gap:10px;align-items:end}
+.df-group{min-width:0}.df-label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:#7b878c;font-weight:900;margin-bottom:6px}
+.df-seg{display:flex;gap:6px;flex-wrap:wrap}.df-btn{border:1px solid #ddd1c2;background:#f7f1e8;color:#4f5c63;border-radius:999px;padding:8px 10px;font-size:.72rem;font-weight:900}
+.df-btn.active{background:#0d5667;color:#fff;border-color:#0d5667;box-shadow:0 8px 18px rgba(13,86,103,.18)}
+.df-btn:disabled{opacity:.35}.df-inputs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.df-input{width:100%;min-width:0;border:1px solid #ddd1c2;background:#fff;border-radius:11px;padding:9px 10px;color:#26343b;font:inherit;font-size:.78rem}
+.df-secondary{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px;margin-top:10px}
+.df-reset{border:0;background:transparent;color:#0d6674;font-weight:900;font-size:.75rem;padding:8px 0;cursor:pointer}
+.modal-lots{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.mlot{padding:0;overflow:hidden;box-shadow:0 8px 22px rgba(11,31,41,.05)}
+.mlot-photo{height:155px;background:linear-gradient(135deg,#0c3948,#0f6270);position:relative;overflow:hidden}
+.mlot-photo img{width:100%;height:100%;object-fit:cover}.mlot-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(4,21,29,.5),transparent 65%)}
+.mlot-photo-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:#d9eced;text-align:center;padding:15px}
+.mlot-photo-placeholder b{font-size:1rem}.mlot-photo-placeholder span{display:block;margin-top:5px;font-size:.67rem;color:#a9cdd1}
+.mlot-body{padding:15px}.mlot-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.mlot-head strong{font-size:1rem}
+.corner-badge{display:inline-flex;align-items:center;gap:4px;padding:6px 8px;border-radius:999px;background:#f1d18d;color:#513b0a;font-size:.63rem;font-weight:950;white-space:nowrap}
+.mlot-grid{grid-template-columns:repeat(2,1fr);margin-top:10px}.mlot-monthly{margin-top:9px;padding:10px 11px;border-radius:12px;background:#e9f5f2;border:1px solid #d0ebe5;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.mlot-monthly small{color:#53716f;font-size:.64rem}.mlot-monthly strong{color:#0b5c65;font-size:.9rem;text-align:right}
+.quote-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;padding:14px;border-radius:17px;background:#fffdf9;border:1px solid #e2d8ca}
+.quote-control label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:#7a878d;font-weight:900;margin-bottom:7px}
+.quote-control .df-seg{gap:5px}.quote-control .df-btn{padding:7px 9px}
+.payment-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.payment-card{padding:16px;border-radius:18px;background:#fffdf9;border:1px solid #e1d6c8;box-shadow:0 8px 20px rgba(11,31,41,.04)}
+.payment-card.selected{border:2px solid #0d6572;background:#f5fffd}.payment-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.payment-top strong{font-size:1.05rem}.payment-top span{font-size:.66rem;color:#66777d}
+.payment-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}.payment-grid div{padding:10px;border-radius:11px;background:#f3ece2}.payment-grid small{display:block;color:#858f94;font-size:.61rem}.payment-grid b{display:block;margin-top:3px;font-size:.82rem}
+.payment-monthly{margin-top:9px;padding:13px;border-radius:13px;background:linear-gradient(135deg,#0a4050,#0d6572);color:#fff}.payment-monthly small{display:block;color:#bde1e0;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em}.payment-monthly strong{display:block;margin-top:3px;font-size:1.25rem}
+.exchange-note{margin:-5px 0 14px;color:#758188;font-size:.72rem;text-align:right}.quote-photo-slot{height:170px;border-radius:17px;overflow:hidden;margin-bottom:16px;background:linear-gradient(135deg,#0c3948,#0f6270);position:relative}.quote-photo-slot img{width:100%;height:100%;object-fit:cover}.quote-photo-slot .mlot-photo-placeholder{position:absolute}
+.lot-features{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.df-grid{grid-template-columns:1fr 1fr}.df-secondary{grid-template-columns:1fr 1fr}.quote-controls{grid-template-columns:1fr}.payment-options{grid-template-columns:1fr}}
+@media(max-width:680px){.development-filters{margin-left:-4px;margin-right:-4px;padding:13px;border-radius:16px}.df-grid,.df-secondary{grid-template-columns:1fr}.modal-lots{grid-template-columns:1fr}.mlot-photo{height:175px}.payment-grid{grid-template-columns:1fr 1fr}.quote-photo-slot{height:150px}}
+
 </style>
 </head>
 
@@ -955,77 +995,142 @@ function quoteLot(modelId,lotId){
   const lot=model.available.find(x=>String(x.id)===String(lotId));
   if(!lot)return;
   selectedQuote={model,lot};
-  lastFocusedElement=document.activeElement;
+  if(typeof lastFocusedElement!=="undefined") lastFocusedElement=document.activeElement;
+  quoteSettings={
+    currency:developmentFilters.currency||"USD",
+    downPct:Number(developmentFilters.downPct)||null,
+    term:Number(developmentFilters.term)||0
+  };
   renderQuoteModal();
   const modal=document.getElementById("quoteModal");
   modal.classList.add("open");
   modal.setAttribute("aria-hidden","false");
   document.body.style.overflow="hidden";
-  document.getElementById("quoteContent").focus();
+  document.getElementById("quoteContent")?.focus();
 }
 function closeQuoteModal(){
   const modal=document.getElementById("quoteModal");
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden","true");
   document.body.style.overflow="";
-  if(lastFocusedElement?.isConnected) lastFocusedElement.focus();
+  if(typeof lastFocusedElement!=="undefined" && lastFocusedElement?.isConnected) lastFocusedElement.focus();
 }
-function formatCurrency(v){
-  if(!(Number(v)>0))return "Consultar";
-  return `$${new Intl.NumberFormat("en-US",{maximumFractionDigits:2}).format(Number(v))} USD`;
+function convertQuoteValue(v,currency=quoteSettings.currency){
+  const n=Number(v);
+  if(!Number.isFinite(n)) return null;
+  return currency==="MXN" ? n*Number(state.exchangeRate||17) : n;
 }
-function quoteFinance(model,lot){
+function formatQuoteMoney(v,currency=quoteSettings.currency){
+  const converted=convertQuoteValue(v,currency);
+  if(!(Number(converted)>=0))return "Consultar";
+  const locale=currency==="MXN"?"es-MX":"en-US";
+  return `$${new Intl.NumberFormat(locale,{minimumFractionDigits:2,maximumFractionDigits:2}).format(converted)} ${currency}`;
+}
+function planOptionsForLot(model,lot,opts={}){
   const p=resolvePrice(model,lot);
   const area=Number(lot.superficie_m2);
-  if(!p.ok || !(area>0) || !(Number(p.financed)>0) || !(Number(p.downPct)>0)){
-    return {ok:false};
-  }
-  const total=area*Number(p.financed);
-  const down=total*(Number(p.downPct)/100);
-  const balance=total-down;
-  const terms=(p.terms||[]).filter(x=>Number(x)>0);
-  const payments=terms.map(months=>({months,monthly:balance/Number(months)}));
-  return {ok:true,price:p.financed,pct:p.downPct,total,down,balance,terms,payments};
+  if(!(area>0)) return [];
+  const rows=(p.rows||[]).filter(r=>Number(r.FINANCIADO)>0 && Number(r.MESES)>0);
+  if(!rows.length) return [];
+  const requestedDown=Number(opts.downPct)||0;
+  const requestedTerm=Number(opts.term)||0;
+  const seen=new Set();
+  return rows.map(r=>{
+    const meta=state.priceMeta.find(x=>Number(x.id)===Number(r.id));
+    const cornerExtra=lot.es_esquina===true ? Number(meta?.esquina_extra||0) : 0;
+    const price=Number(r.FINANCIADO)+cornerExtra,months=Number(r.MESES),minDown=Number(r["ENGANCHE MINIMO"])||0;
+    if(requestedDown && requestedDown<minDown) return null;
+    if(requestedTerm && months!==requestedTerm) return null;
+    const downPct=requestedDown||minDown;
+    const total=area*price,down=total*(downPct/100),balance=total-down,monthly=balance/months;
+    return {price,months,minDown,downPct,total,down,balance,monthly,row:r};
+  }).filter(Boolean).filter(x=>{
+    const key=[x.price,x.months,x.downPct].join("|");
+    if(seen.has(key))return false;seen.add(key);return true;
+  }).sort((a,b)=>a.months-b.months || a.price-b.price);
 }
-function renderQuoteModal(){
+function setQuoteCurrency(currency){
+  quoteSettings.currency=currency==="MXN"?"MXN":"USD";
+  renderQuoteModal(true);
+}
+function setQuoteDown(pct){
+  quoteSettings.downPct=Number(pct)||null;
+  renderQuoteModal(true);
+}
+function setQuoteTerm(term){
+  quoteSettings.term=Number(term)||0;
+  renderQuoteModal(true);
+}
+function captureAppointmentDraft(){
+  return {
+    nombre:document.getElementById("citaNombre")?.value||"",
+    telefono:document.getElementById("citaTelefono")?.value||"",
+    fecha:document.getElementById("citaFecha")?.value||"",
+    hora:document.getElementById("citaHora")?.value||""
+  };
+}
+function renderQuoteModal(preserve=false){
   if(!selectedQuote)return;
+  const draft=preserve?captureAppointmentDraft():null;
   const {model,lot}=selectedQuote;
   const p=resolvePrice(model,lot);
-  const f=quoteFinance(model,lot);
-  const pct=p.ok&&Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
+  const minDown=Math.min(...(p.rows||[]).map(r=>Number(r["ENGANCHE MINIMO"])).filter(v=>v>0),Infinity);
+  if(!Number.isFinite(minDown)) quoteSettings.downPct=null;
+  if(quoteSettings.downPct && quoteSettings.downPct<minDown) quoteSettings.downPct=minDown;
+  const allTerms=[...new Set((p.rows||[]).map(r=>Number(r.MESES)).filter(v=>v>0))].sort((a,b)=>a-b);
+  if(quoteSettings.term && !allTerms.includes(Number(quoteSettings.term))) quoteSettings.term=0;
+  const plans=planOptionsForLot(model,lot,{downPct:quoteSettings.downPct,term:quoteSettings.term});
   const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
-  const financeHtml=f.ok?`
-    <div class="finance-box">
-      <h3>Resumen del financiamiento</h3>
-      <div class="finance-grid">
-        <div><small>Precio financiado</small><strong>${formatCurrency(f.price)} / m²</strong></div>
-        <div><small>Valor financiado estimado</small><strong>${formatCurrency(f.total)}</strong></div>
-        <div><small>Enganche mínimo</small><strong>${pct} · ${formatCurrency(f.down)}</strong></div>
-        <div><small>Saldo estimado</small><strong>${formatCurrency(f.balance)}</strong></div>
-        <div><small>Plazos disponibles</small><strong>${f.terms.length?f.terms.join(" / ")+" meses":"Consultar"}</strong></div>
-        <div><small>Mensualidad estimada</small><strong>${f.payments.length?f.payments.map(x=>`${x.months}m: ${formatCurrency(x.monthly)}`).join(" · "):"Consultar"}</strong></div>
-      </div>
-      <p class="finance-note">Cálculo basado únicamente en la tabla comercial vigente. Si el lote requiere una regla especial, se mostrará “Consultar” en lugar de estimar.</p>
-    </div>`:`
-    <div class="finance-box">
-      <h3>Financiamiento</h3>
-      <p class="finance-note">Este lote requiere validación de precio o condición especial. El asesor confirmará el plan exacto antes de la cita.</p>
+  const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";
+  const photo=getLotPhoto(lot,model).url;
+  const downChoices=[5,10,15,20];
+  const controls=`
+    <div class="quote-controls">
+      <div class="quote-control"><label>Moneda</label><div class="df-seg">
+        <button type="button" class="df-btn ${quoteSettings.currency==="USD"?"active":""}" onclick="setQuoteCurrency('USD')">USD</button>
+        <button type="button" class="df-btn ${quoteSettings.currency==="MXN"?"active":""}" onclick="setQuoteCurrency('MXN')">MXN</button>
+      </div></div>
+      <div class="quote-control"><label>Enganche</label><div class="df-seg">
+        ${downChoices.map(v=>`<button type="button" class="df-btn ${Number(quoteSettings.downPct)===v?"active":""}" ${v<minDown?"disabled":""} onclick="setQuoteDown(${v})">${v}%</button>`).join("")}
+      </div></div>
+      <div class="quote-control"><label>Plazo</label><div class="df-seg">
+        <button type="button" class="df-btn ${!quoteSettings.term?"active":""}" onclick="setQuoteTerm(0)">Todos</button>
+        ${allTerms.map(v=>`<button type="button" class="df-btn ${Number(quoteSettings.term)===v?"active":""}" onclick="setQuoteTerm(${v})">${v}m</button>`).join("")}
+      </div></div>
     </div>`;
+  const paymentHtml=plans.length?`
+    <div class="payment-options">
+      ${plans.map(x=>`<div class="payment-card ${Number(quoteSettings.term)===x.months?"selected":""}">
+        <div class="payment-top"><strong>${x.months} meses</strong><span>${formatQuoteMoney(x.price)} / m²</span></div>
+        <div class="payment-grid">
+          <div><small>Valor total</small><b>${formatQuoteMoney(x.total)}</b></div>
+          <div><small>Enganche ${money(x.downPct)}%</small><b>${formatQuoteMoney(x.down)}</b></div>
+          <div><small>Saldo</small><b>${formatQuoteMoney(x.balance)}</b></div>
+          <div><small>Precio/m²</small><b>${formatQuoteMoney(x.price)}</b></div>
+        </div>
+        <div class="payment-monthly"><small>Mensualidad</small><strong>${formatQuoteMoney(x.monthly)}</strong></div>
+      </div>`).join("")}
+    </div>`:`<div class="finance-box"><h3>Financiamiento</h3><p class="finance-note">Este lote requiere validación de precio o condición especial. El asesor confirmará el plan exacto antes de la cita.</p></div>`;
+  const exchange=quoteSettings.currency==="MXN"?`<div class="exchange-note">Conversión con tipo de cambio configurado: $${money(state.exchangeRate)} MXN por USD.</div>`:"";
   document.getElementById("quoteContent").innerHTML=`
     <div class="quote-head">
       <button class="quote-close" type="button" aria-label="Cerrar cotización" onclick="closeQuoteModal()">✕</button>
       <small>Terreno seleccionado</small>
       <h2 id="quoteTitle">${esc(model.name)} · Lote ${esc(lot.lote||"—")}</h2>
-      <p>La información del lote ya está cargada. Solo falta agendar tu visita.</p>
+      <p>Elige moneda, enganche y plazo para comparar el financiamiento.</p>
     </div>
     <div class="quote-body">
+      <div class="quote-photo-slot">${photo?`<img src="${esc(photo)}" alt="Foto del lote" loading="lazy">`:`<div class="mlot-photo-placeholder"><div><b>📷 Foto del lote</b><span>Espacio reservado para fotografía</span></div></div>`}</div>
       <div class="quote-summary">
         <div class="qitem"><small>Manzana</small><strong>${esc(lot.manzana||"—")}</strong></div>
         <div class="qitem"><small>Lote</small><strong>${esc(lot.lote||"—")}</strong></div>
         <div class="qitem"><small>Superficie</small><strong>${m2(lot.superficie_m2)}</strong></div>
+        <div class="qitem"><small>Esquina</small><strong>${esc(esquina)}</strong></div>
         <div class="qitem"><small>Talud</small><strong>${esc(talud)}</strong></div>
       </div>
-      ${financeHtml}
+      ${controls}
+      ${exchange}
+      ${paymentHtml}
       <form class="appointment-box" id="appointmentForm">
         <h3>Agenda tu cita</h3>
         <p>Completa estos 4 datos para solicitar tu cita. Un asesor se pondrá en contacto contigo para dar seguimiento y confirmar los detalles.</p>
@@ -1042,6 +1147,12 @@ function renderQuoteModal(){
   const today=new Date();
   const local=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
   document.getElementById("citaFecha").min=local;
+  if(draft){
+    document.getElementById("citaNombre").value=draft.nombre;
+    document.getElementById("citaTelefono").value=draft.telefono;
+    document.getElementById("citaFecha").value=draft.fecha;
+    document.getElementById("citaHora").value=draft.hora;
+  }
   document.getElementById("appointmentForm").addEventListener("submit",submitAppointment);
 }
 async function submitAppointment(e){
@@ -1050,7 +1161,9 @@ async function submitAppointment(e){
 
   const {model,lot}=selectedQuote;
   const p=resolvePrice(model,lot);
-  const pct=p.ok&&Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
+  const selectedPlans=planOptionsForLot(model,lot,{downPct:quoteSettings.downPct,term:quoteSettings.term});
+  const selectedPlan=selectedPlans[0]||null;
+  const pct=selectedPlan?`${money(selectedPlan.downPct)}%`:p.ok&&Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
   const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
 
   const nombre=(document.getElementById("citaNombre").value||"").trim();
@@ -1099,8 +1212,12 @@ async function submitAppointment(e){
           manzana:lot.manzana||"",
           lote:lot.lote||"",
           superficie:m2(lot.superficie_m2),
-          enganche:pct,
-          talud
+          enganche:selectedPlan?`${pct} · ${formatQuoteMoney(selectedPlan.down)}`:pct,
+          talud,
+          esquina:lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar",
+          moneda:quoteSettings.currency,
+          plazo:selectedPlan?`${selectedPlan.months} meses`:"Consultar",
+          mensualidad:selectedPlan?formatQuoteMoney(selectedPlan.monthly):"Consultar"
         }
       })
     });
@@ -1132,9 +1249,11 @@ async function submitAppointment(e){
 }
 
 const state = {
-  media:[], locations:[], lots:[], lotMedia:[], prices:[],
-  models:[], filtered:[], lotsShown:12, current:null
+  media:[], locations:[], lots:[], lotMedia:[], prices:[], priceMeta:[], config:[],
+  models:[], filtered:[], lotsShown:12, current:null, exchangeRate:17
 };
+let developmentFilters={currency:"USD",downPct:0,term:0,monthlyMin:"",monthlyMax:"",terrain:"all",areaMin:"",areaMax:"",search:""};
+let quoteSettings={currency:"USD",downPct:null,term:0};
 
 function canon(v=""){
   return String(v).normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -1384,7 +1503,6 @@ function getLotPhoto(lot,model){
   if(direct) return {url:direct,type:"lote"};
   const lm=model.lotMedia.find(x=>canon(x.manzana)===canon(lot.manzana)&&canon(x.lote)===canon(lot.lote)&&x.public_url);
   if(lm?.public_url) return {url:lm.public_url,type:"lote"};
-  if(model.cover) return {url:model.cover,type:"desarrollo"};
   return {url:"",type:"ninguna"};
 }
 
@@ -1409,6 +1527,7 @@ function renderLots(){
     const p=resolvePrice(model,lot);
     const pct=p.ok && Number(p.downPct)>0 ? `${money(p.downPct)}%` : "Consultar";
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
+    const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";
     const visual=photo
       ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
       : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
@@ -1422,6 +1541,7 @@ function renderLots(){
             <div class="lot-feature"><small>Medida</small><strong>${m2(lot.superficie_m2)}</strong></div>
             <div class="lot-feature"><small>Enganche</small><strong>${esc(pct)}</strong></div>
             <div class="lot-feature"><small>Talud</small><strong>${esc(talud)}</strong></div>
+            <div class="lot-feature"><small>Esquina</small><strong>${esc(esquina)}</strong></div>
           </div>
           <button class="lot-btn" onclick="quoteLot('${model.id}','${esc(lot.id)}')">Cotizar este lote →</button>
           <div class="advisor-note">El asesor se asigna automáticamente al confirmar la cita.</div>
@@ -1548,79 +1668,140 @@ function openMap(id){
   if(m?.loc?.maps_url) window.open(m.loc.maps_url,"_blank","noopener");
 }
 
+function resetDevelopmentFilters(){
+  developmentFilters={currency:"USD",downPct:0,term:0,monthlyMin:"",monthlyMax:"",terrain:"all",areaMin:"",areaMax:"",search:""};
+  renderDevelopmentToolbar();
+  renderDevelopmentLots();
+}
+function setDevelopmentFilter(key,value,rerenderToolbar=false){
+  developmentFilters[key]=value;
+  if(rerenderToolbar) renderDevelopmentToolbar();
+  renderDevelopmentLots();
+}
+function renderDevelopmentToolbar(){
+  const el=document.getElementById("developmentFilters");
+  if(!el)return;
+  const f=developmentFilters;
+  el.innerHTML=`
+    <div class="df-title"><strong>Filtra los lotes</strong><span>Los cálculos usan precios comerciales vigentes</span></div>
+    <div class="df-grid">
+      <div class="df-group"><span class="df-label">Mensualidad (${f.currency})</span><div class="df-inputs">
+        <input class="df-input" inputmode="decimal" placeholder="Desde" value="${esc(f.monthlyMin)}" oninput="setDevelopmentFilter('monthlyMin',this.value)">
+        <input class="df-input" inputmode="decimal" placeholder="Hasta" value="${esc(f.monthlyMax)}" oninput="setDevelopmentFilter('monthlyMax',this.value)">
+      </div></div>
+      <div class="df-group"><span class="df-label">Enganche</span><div class="df-seg">
+        ${[0,5,10,15,20].map(v=>`<button type="button" class="df-btn ${Number(f.downPct)===v?"active":""}" onclick="setDevelopmentFilter('downPct',${v},true)">${v?`${v}%`:"Mínimo"}</button>`).join("")}
+      </div></div>
+      <div class="df-group"><span class="df-label">Plazo</span><div class="df-seg">
+        ${[0,120,150].map(v=>`<button type="button" class="df-btn ${Number(f.term)===v?"active":""}" onclick="setDevelopmentFilter('term',${v},true)">${v?`${v}m`:"Todos"}</button>`).join("")}
+      </div></div>
+      <div class="df-group"><span class="df-label">Tipo de terreno</span><div class="df-seg">
+        ${[["all","Todos"],["flat","Plano"],["talud","Talud"],["corner","Esquina"]].map(([v,l])=>`<button type="button" class="df-btn ${f.terrain===v?"active":""}" onclick="setDevelopmentFilter('terrain','${v}',true)">${l}</button>`).join("")}
+      </div></div>
+    </div>
+    <div class="df-secondary">
+      <div class="df-group"><span class="df-label">Superficie m²</span><div class="df-inputs">
+        <input class="df-input" inputmode="decimal" placeholder="Desde" value="${esc(f.areaMin)}" oninput="setDevelopmentFilter('areaMin',this.value)">
+        <input class="df-input" inputmode="decimal" placeholder="Hasta" value="${esc(f.areaMax)}" oninput="setDevelopmentFilter('areaMax',this.value)">
+      </div></div>
+      <div class="df-group"><span class="df-label">Buscar Mz / lote</span><input class="df-input" placeholder="Ej. Mz 17 o lote 106" value="${esc(f.search)}" oninput="setDevelopmentFilter('search',this.value)"></div>
+      <div class="df-group"><span class="df-label">Moneda</span><div class="df-seg">
+        <button type="button" class="df-btn ${f.currency==="USD"?"active":""}" onclick="setDevelopmentFilter('currency','USD',true)">USD</button>
+        <button type="button" class="df-btn ${f.currency==="MXN"?"active":""}" onclick="setDevelopmentFilter('currency','MXN',true)">MXN</button>
+        <button type="button" class="df-reset" onclick="resetDevelopmentFilters()">Limpiar filtros</button>
+      </div></div>
+    </div>`;
+}
+function developmentLotMatches(model,lot){
+  const f=developmentFilters,area=Number(lot.superficie_m2)||0;
+  if(f.terrain==="flat" && lot.tiene_talud!==false)return false;
+  if(f.terrain==="talud" && lot.tiene_talud!==true)return false;
+  if(f.terrain==="corner" && lot.es_esquina!==true)return false;
+  if(Number(f.areaMin)>0 && area<Number(f.areaMin))return false;
+  if(Number(f.areaMax)>0 && area>Number(f.areaMax))return false;
+  if(f.search){
+    const q=canon(f.search),hay=canon(`mz ${lot.manzana} manzana ${lot.manzana} lote ${lot.lote}`);
+    if(!hay.includes(q))return false;
+  }
+  const plans=planOptionsForLot(model,lot,{downPct:Number(f.downPct)||0,term:Number(f.term)||0});
+  const hasFinancialFilter=Number(f.downPct)>0||Number(f.term)>0||Number(f.monthlyMin)>0||Number(f.monthlyMax)>0;
+  if(hasFinancialFilter && !plans.length)return false;
+  if(Number(f.monthlyMin)>0||Number(f.monthlyMax)>0){
+    const min=Number(f.monthlyMin)||0,max=Number(f.monthlyMax)||Infinity;
+    if(!plans.some(x=>{const m=convertQuoteValue(x.monthly,f.currency);return m>=min&&m<=max;}))return false;
+  }
+  return true;
+}
+function renderDevelopmentLots(){
+  const m=state.current,wrap=document.getElementById("developmentLots");
+  if(!m||!wrap)return;
+  const list=m.available.filter(l=>developmentLotMatches(m,l));
+  const count=document.getElementById("developmentLotCount");
+  if(count)count.textContent=`Mostrando ${list.length} de ${m.available.length}`;
+  if(!list.length){wrap.innerHTML=`<div class="state">No hay lotes que coincidan con estos filtros. Prueba ampliar mensualidad, enganche, plazo o superficie.</div>`;return;}
+  wrap.innerHTML=list.map(l=>{
+    const p=resolvePrice(m,l),pct=p.ok&&Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
+    const talud=l.tiene_talud===true?"Sí":l.tiene_talud===false?"No":"Consultar";
+    const esquina=l.es_esquina===true?"Sí":l.es_esquina===false?"No":"Consultar";
+    const photo=getLotPhoto(l,m).url;
+    const plans=planOptionsForLot(m,l,{downPct:Number(developmentFilters.downPct)||0,term:Number(developmentFilters.term)||0});
+    const monthly=plans.length?Math.min(...plans.map(x=>convertQuoteValue(x.monthly,developmentFilters.currency))):null;
+    const monthlyText=Number.isFinite(monthly)?`$${new Intl.NumberFormat(developmentFilters.currency==="MXN"?"es-MX":"en-US",{maximumFractionDigits:2}).format(monthly)} ${developmentFilters.currency}`:"Consultar";
+    return `<article class="mlot">
+      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="Foto del lote ${esc(l.lote||"")}" loading="lazy">`:`<div class="mlot-photo-placeholder"><div><b>📷 Foto del lote</b><span>Espacio reservado para fotografía</span></div></div>`}</div>
+      <div class="mlot-body">
+        <div class="mlot-head"><div><strong>Lote ${esc(l.lote||"—")}</strong><div class="sub">${esc(m.name)} · Mz ${esc(l.manzana||"—")}</div></div>${l.es_esquina===true?`<span class="corner-badge">◆ ESQUINA</span>`:""}</div>
+        <div class="mlot-grid">
+          <div><small>Superficie</small><b>${m2(l.superficie_m2)}</b></div>
+          <div><small>Enganche mín.</small><b>${esc(pct)}</b></div>
+          <div><small>Talud</small><b>${esc(talud)}</b></div>
+          <div><small>Esquina</small><b>${esc(esquina)}</b></div>
+          <div><small>Estado</small><b>Disponible</b></div>
+          <div><small>Precio</small><b>${p.ok?esc(p.label):"Consultar"}</b></div>
+        </div>
+        <div class="mlot-monthly"><small>Mensualidad desde</small><strong>${monthlyText}</strong></div>
+        <button onclick="quoteLot('${m.id}','${esc(l.id)}')">Cotizar este lote →</button>
+      </div>
+    </article>`;
+  }).join("");
+}
 function openDevelopment(id){
   const m=state.models.find(x=>x.id===id);
   if(!m) return;
   state.current=m;
-  lastFocusedElement=document.activeElement;
+  if(typeof lastFocusedElement!=="undefined") lastFocusedElement=document.activeElement;
+  developmentFilters={currency:"USD",downPct:0,term:0,monthlyMin:"",monthlyMax:"",terrain:"all",areaMin:"",areaMax:"",search:""};
   const zone=m.zones[0] || m.loc?.zona || "Zona por confirmar";
   const address=m.loc?.direccion || "Consulta la ubicación desde el botón de mapa.";
   const cover=m.cover || "";
   const gallery=m.media.slice(0,5).map(x=>`<img src="${esc(x.public_url)}" alt="" loading="lazy" onerror="devImageFallback(this)">`).join("");
-  const lots=m.available.slice(0,18);
-
   document.getElementById("modalBody").innerHTML=`
     <div class="modal-hero">
       ${cover?`<img src="${esc(cover)}" alt="" onerror="devImageFallback(this)">`:""}
-      <div class="modal-title">
-        <small>${m.type.toUpperCase()} · ${esc(zone)}</small>
-        <h2 id="developmentTitle">${esc(m.name)}</h2>
-      </div>
+      <div class="modal-title"><small>${m.type.toUpperCase()} · ${esc(zone)}</small><h2 id="developmentTitle">${esc(m.name)}</h2></div>
     </div>
     <div class="modal-content">
       <div class="modal-top">
-        <div class="info-panel">
-          <h3>Sobre el desarrollo</h3>
-          <p>${esc(m.description)}</p>
-          <div class="amenities">${m.amenities.map(a=>`<span class="amenity">✓ ${esc(a)}</span>`).join("")}</div>
-        </div>
-        <div class="location-panel">
-          <h3>Ubicación</h3>
-          <p><strong>${esc(zone)}</strong><br>${esc(address)}</p>
-          ${m.loc?.maps_url?`<button class="devbtn" style="width:100%;margin-top:10px" onclick="openMap('${m.id}')">Abrir en Maps →</button>`:"<p><small>Ubicación aún no registrada en Supabase.</small></p>"}
-        </div>
+        <div class="info-panel"><h3>Sobre el desarrollo</h3><p>${esc(m.description)}</p><div class="amenities">${m.amenities.map(a=>`<span class="amenity">✓ ${esc(a)}</span>`).join("")}</div></div>
+        <div class="location-panel"><h3>Ubicación</h3><p><strong>${esc(zone)}</strong><br>${esc(address)}</p>${m.loc?.maps_url?`<button class="devbtn" style="width:100%;margin-top:10px" onclick="openMap('${m.id}')">Abrir en Maps →</button>`:"<p><small>Ubicación aún no registrada en Supabase.</small></p>"}</div>
       </div>
-
       <div class="modal-stats">
         <div class="modal-stat"><small>Lotes disponibles</small><strong>${m.available.length || "Consultar"}</strong></div>
         <div class="modal-stat"><small>Superficie desde</small><strong>${m.minArea?m2(m.minArea):"Consultar"}</strong></div>
         <div class="modal-stat"><small>Superficie hasta</small><strong>${m.maxArea?m2(m.maxArea):"Consultar"}</strong></div>
         <div class="modal-stat"><small>Enganche desde</small><strong>${m.minDownPct?`${money(m.minDownPct)}%`:"Consultar"}</strong></div>
       </div>
-
       ${gallery?`<div class="gallery">${gallery}</div>`:""}
-
-      <div class="modal-lots-head">
-        <h3>Lotes disponibles</h3>
-        <span>${m.available.length?`Mostrando ${Math.min(18,m.available.length)} de ${m.available.length}`:"Sin lotes disponibles registrados"}</span>
-      </div>
-
-      <div class="modal-lots">
-        ${lots.length?lots.map(l=>{
-          const p=resolvePrice(m,l);
-          const pct=p.ok && Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
-          const talud=l.tiene_talud===true?"Sí":l.tiene_talud===false?"No":"Consultar";
-          return `
-          <div class="mlot">
-            <strong>Lote ${esc(l.lote||"—")}</strong>
-            <div class="sub">${esc(m.name)} · Mz ${esc(l.manzana||"—")}</div>
-            <div class="mlot-grid">
-              <div><small>Medida</small><b>${m2(l.superficie_m2)}</b></div>
-              <div><small>Enganche</small><b>${esc(pct)}</b></div>
-              <div><small>Talud</small><b>${esc(talud)}</b></div>
-              <div><small>Estado</small><b>Disponible</b></div>
-            </div>
-            <button onclick="quoteLot('${m.id}','${esc(l.id)}')">Cotizar este lote →</button>
-          </div>`;
-        }).join(""):`<div class="state">Actualmente no hay lotes marcados como disponibles en el inventario para este desarrollo.</div>`}
-      </div>
+      <div id="developmentFilters" class="development-filters"></div>
+      <div class="modal-lots-head"><h3>Lotes disponibles</h3><span id="developmentLotCount">${m.available.length?`Mostrando ${m.available.length} de ${m.available.length}`:"Sin lotes disponibles registrados"}</span></div>
+      <div class="modal-lots" id="developmentLots"></div>
     </div>`;
-
-  document.getElementById("devModal").classList.add("open");
-  document.getElementById("devModal").setAttribute("aria-hidden","false");
-  document.body.style.overflow="hidden";
+  renderDevelopmentToolbar();
+  renderDevelopmentLots();
+  const modal=document.getElementById("devModal");
+  modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+  document.getElementById("modalCard")?.focus();
   history.replaceState(null,"",`#${m.id}`);
-  document.getElementById("modalCard").focus();
 }
 
 function closeModal(){
@@ -1633,18 +1814,23 @@ function closeModal(){
 
 async function load(){
   try{
-    const [media,locations,lots,lotMedia,prices] = await Promise.all([
+    const [media,locations,lots,lotMedia,prices,priceMeta,config] = await Promise.all([
       fetchAll("desarrollos_multimedia","select=desarrollo,public_url,descripcion,orden,portada,activo&activo=eq.true&order=desarrollo.asc,portada.desc,orden.asc"),
       fetchAll("ubicaciones_desarrollos","select=desarrollo,zona,direccion,latitud,longitud,maps_url,activo&activo=eq.true&order=desarrollo.asc"),
       fetchAll("inventario_lotes","select=id,desarrollo,desarrollo_id,manzana,lote,superficie_m2,disponible,estatus,es_esquina,tiene_talud,lados_talud,entrega_status,descripcion_lote,foto_lote_public_url,urlfoto,foto_lote_url&order=desarrollo.asc,manzana.asc,lote.asc"),
       fetchAll("lotes_multimedia","select=desarrollo,manzana,lote,public_url,descripcion,portada,orden,activo&activo=eq.true&order=desarrollo.asc,manzana.asc,lote.asc,portada.desc,orden.asc"),
-      fetchAll("precios_terrenos_limpio","select=*&ACTIVO=eq.true")
+      fetchAll("precios_terrenos_limpio","select=*&ACTIVO=eq.true"),
+      fetchAll("precios_terrenos","select=id,esquina_extra&activo=eq.true"),
+      fetchAll("config_publica_v20","select=clave,valor")
     ]);
     state.media=media;
     state.locations=locations;
     state.lots=lots;
     state.lotMedia=lotMedia;
     state.prices=prices;
+    state.priceMeta=priceMeta;
+    state.config=config;
+    state.exchangeRate=Number(config.find(x=>x.clave==="tipo_cambio_usd_mxn")?.valor)||17;
     buildModels();
 
     if(location.hash){
