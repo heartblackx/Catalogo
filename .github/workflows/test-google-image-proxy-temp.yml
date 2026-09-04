@@ -1,0 +1,28 @@
+name: Test Google image proxy temp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/test-google-image-proxy-temp.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download one image through proxy
+        shell: bash
+        run: |
+          set -euxo pipefail
+          URL='https://lh3.googleusercontent.com/sitesv/AG8ngQXPPqVG_LNkfB8NeJUXmOJWZgHrjcVH3_9ZtXkv8qZ2mK7TPpsck-8O9VbGKFWjT7rfFgwKGkTlCwz8FxENUXFmjAh_CxsmObvpJ-8u6I4HUwrznkoSBOknCQsRvjzeCKUs7BaDJO3Rae6m5dPRNr1K1f3UJjq_FJs8Vi1nCjuYv7MMDVAOSgmsjM7KiP4=w16383'
+          ENC=$(python -c 'import urllib.parse,os; print(urllib.parse.quote(os.environ["URL"],safe=""))' )
+          curl -L --fail --max-time 25 -A 'Mozilla/5.0' "https://images.weserv.nl/?url=$ENC&output=jpg&q=100" -o imagen.jpg
+          file imagen.jpg
+          test $(stat -c%s imagen.jpg) -gt 1000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prueba-imagen-google
+          path: imagen.jpg
+          retention-days: 1
+        env:
+          URL: https://lh3.googleusercontent.com/sitesv/AG8ngQXPPqVG_LNkfB8NeJUXmOJWZgHrjcVH3_9ZtXkv8qZ2mK7TPpsck-8O9VbGKFWjT7rfFgwKGkTlCwz8FxENUXFmjAh_CxsmObvpJ-8u6I4HUwrznkoSBOknCQsRvjzeCKUs7BaDJO3Rae6m5dPRNr1K1f3UJjq_FJs8Vi1nCjuYv7MMDVAOSgmsjM7KiP4=w16383
