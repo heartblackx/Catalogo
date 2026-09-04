@@ -13,12 +13,12 @@
 <meta property="og:title" content="Terrenos disponibles | Invierte Inteligente TJ">
 <meta property="og:description" content="Consulta lotes reales, compara financiamiento en USD o MXN y agenda atención con un asesor.">
 <meta property="og:url" content="https://catalogo.invierteinteligentetj.com/">
-<meta property="og:image" content="https://grupoconcordia.info/gcexperience/Banners/VillaParaiso-VLB.jpg">
+<meta property="og:image" content="https://catalogo.invierteinteligentetj.com/media/terreno-costa-seguro.jpg">
 <meta property="og:image:alt" content="Terrenos disponibles en Baja California">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Terrenos disponibles | Invierte Inteligente TJ">
 <meta name="twitter:description" content="Lotes disponibles, cotización y atención inmobiliaria directa.">
-<meta name="twitter:image" content="https://grupoconcordia.info/gcexperience/Banners/VillaParaiso-VLB.jpg">
+<meta name="twitter:image" content="https://catalogo.invierteinteligentetj.com/media/terreno-costa-seguro.jpg">
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
@@ -773,6 +773,13 @@ footer{padding:40px 0 48px}
 @media(max-width:680px){.hero-proof{gap:6px}.hero-proof span{font-size:.62rem}.trust-section{padding:58px 0 34px}.trust-head,.office-head{display:block}.trust-map-cta{display:inline-flex;margin-top:18px}.trust-grid,.advisor-grid,.office-grid{grid-template-columns:1fr}.advisor-shell{padding:24px 18px;border-radius:24px}.advisor-section{padding:34px 0 42px}.office-section{padding:54px 0}.office-count{display:inline-flex;margin-top:15px}.promo-ready{display:block}.promo-ready>a{display:inline-flex;margin-top:15px}.advisor-actions{grid-template-columns:1fr 1fr}}
 /* /CATALOGO_V17_TRUST_CSS */
 
+
+/* CATALOGO_V18_SAFE_MEDIA_CSS */
+.dev-photo,.mlot-photo,.quote-photo-slot{position:relative}
+.dev-photo::after,.mlot-photo::after,.quote-photo-slot::after{content:"Imagen referencial de terreno";position:absolute;left:10px;bottom:10px;z-index:4;padding:6px 9px;border-radius:999px;background:rgba(5,30,40,.82);color:#fff;font-size:.58rem;font-weight:900;letter-spacing:.02em;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.safe-gallery-v18{position:relative;width:100%;height:100%;min-height:150px;overflow:hidden;border-radius:16px}.safe-gallery-v18 img{width:100%;height:100%;object-fit:cover}.safe-gallery-v18 span{position:absolute;left:10px;bottom:10px;padding:6px 9px;border-radius:999px;background:rgba(5,30,40,.82);color:#fff;font-size:.58rem;font-weight:900}
+/* /CATALOGO_V18_SAFE_MEDIA_CSS */
+
 </style>
 </head>
 
@@ -955,7 +962,7 @@ footer{padding:40px 0 48px}
       <div>
         <div class="kicker">Puntos de atención</div>
         <h2>Oficinas Vive La Baja</h2>
-        <p>Estas ubicaciones se cargan desde la base de oficinas registrada en Supabase. Pulsa una oficina para abrir su liga de Google Maps.</p>
+        <p>Consulta nuestros puntos de atención Vive La Baja. Pulsa una oficina para abrir su liga de Google Maps.</p>
       </div>
       <div class="office-count" id="officeCount">Cargando ubicaciones…</div>
     </div>
@@ -1038,7 +1045,7 @@ const CATALOG = [
   {
     id:"rancho-escondido", name:"Rancho Escondido", members:["Rancho Escondido"], priceNames:["Rancho Escondido"], siteImage:"https://lh3.googleusercontent.com/sitesv/AG8ngQUi1LqdcUlB84PVsckXfDrA0XBlsr9xmztMl_wlMOLxM-iTOhCEMPlCJIITOYfRIkIuTiuRJAzdgWZubY8nChA9o08BvGpPbImD6yMVn_EQzThDgqjrVBULHqwQIkN0WYWq91JzcfQCbPWP5ikVyr1YPIaizH3TqdHKljfNJshNH79-GoGp_hCO8V0zI0Y=w16383", type:"urbano",
     description:"Un desarrollo que combina la tranquilidad de un entorno campestre con acceso a la ciudad. Una alternativa para quienes buscan espacio, vistas y una opción atractiva para construir patrimonio en un ambiente más natural.",
-    amenities:["Vistas privilegiadas","Alta plusvalía","Espacios amplios","Proyecto Grupo Concordia"]
+    amenities:["Vistas privilegiadas","Alta plusvalía","Espacios amplios","Vive La Baja"]
   },
   {
     id:"alamar", name:"Alamar Residencial", members:["Alamar"], priceNames:["Alamar 1"], siteImage:"https://lh3.googleusercontent.com/sitesv/AG8ngQUifPx8O9pc6XXyZlHj_Zt1LsOh6yFKHLsgWFVq1aFsFGyc4RV_VLj-JKdhxwdOpHs636NHJDp830LIXPwv2vKGfSzcXOYT5YIV2SbTHXVhxMDdeP_0kE4FneNCfSQbllT6LbT-R5qnhC7WHE2WchlmOdDkoFTaAhYe4NAixvtDft9XshD3ulvQYdLs=w16383", type:"urbano",
@@ -1383,8 +1390,21 @@ function renderOffices(){
     const name=cleanOfficeName(o.nombre||"Oficina");
     const ref=o.zona?`Zona de referencia: ${String(o.zona).replace(/_/g," ")}`:`Referencia: ${name}`;
     const link=o.maps_url||"";
-    return `<article class="office-card"><span class="office-label">Oficina Vive La Baja</span><h3>${esc(name)}</h3><p>${esc(ref)}</p>${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span>↗</span></a>`:`<span class="office-empty">Liga por confirmar</span>`}</article>`;
+    return `<article class="office-card"><span class="office-label">Vive La Baja</span><h3>${esc(name)}</h3><p>${esc(ref)}</p>${link?`<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span>↗</span></a>`:`<span class="office-empty">Liga por confirmar</span>`}</article>`;
   }).join("");
+}
+
+
+const SAFE_TERRAIN_MEDIA_V18={
+  urbano:"media/terreno-seguro.jpg",
+  costa:"media/terreno-costa-seguro.jpg"
+};
+function safeTerrainImage(model={}){
+  const type=String(model.type||"").toLowerCase();
+  const zone=String((model.zones&&model.zones[0])||model.loc?.zona||"").toLowerCase();
+  return (type==="costa" || /rosarito|ensenada|costa|playa|mar/.test(zone))
+    ? SAFE_TERRAIN_MEDIA_V18.costa
+    : SAFE_TERRAIN_MEDIA_V18.urbano;
 }
 
 const state = {
@@ -1559,7 +1579,7 @@ function buildModels(){
 
     return {
       ...c,lots,available,media,loc,lotMedia,
-      cover:media[0]?.public_url || "",
+      cover:safeTerrainImage(c),
       minPrice:null,
       minArea:areas.length?Math.min(...areas):null,
       maxArea:areas.length?Math.max(...areas):null,
@@ -1638,11 +1658,7 @@ function renderDevelopments(models){
 }
 
 function getLotPhoto(lot,model){
-  const direct=lot.foto_lote_public_url || lot.foto_lote_url || lot.urlfoto;
-  if(direct) return {url:direct,type:"lote"};
-  const lm=model.lotMedia.find(x=>canon(x.manzana)===canon(lot.manzana)&&canon(x.lote)===canon(lot.lote)&&x.public_url);
-  if(lm?.public_url) return {url:lm.public_url,type:"lote"};
-  return {url:"",type:"ninguna"};
+  return {url:safeTerrainImage(model),type:"referencial"};
 }
 
 function renderLots(){
@@ -1668,7 +1684,7 @@ function renderLots(){
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
     const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";
     const visual=photo
-      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
+      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen referencial de terreno"}</span></div>`
       : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
     return `
       <article class="lot">
@@ -1762,7 +1778,7 @@ function renderBudgetSearch(){
     const pct=price.ok&&Number(price.downPct)>0?`${money(price.downPct)}%`:"Consultar";
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
     const visual=photo
-      ? `<div class="search-lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="search-photo-label">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
+      ? `<div class="search-lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="search-photo-label">${photoInfo.type==="lote"?"Foto del lote":"Imagen referencial de terreno"}</span></div>`
       : `<div class="search-lot-photo no-photo"><div class="search-lot-no-photo"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía cargada</span></div></div></div>`;
 
     return `
@@ -1913,7 +1929,7 @@ function openDevelopment(id){
   const zone=m.zones[0] || m.loc?.zona || "Zona por confirmar";
   const address=m.loc?.direccion || "Consulta la ubicación desde el botón de mapa.";
   const cover=m.cover || "";
-  const gallery=m.media.slice(0,5).map(x=>`<img src="${esc(x.public_url)}" alt="" loading="lazy" onerror="devImageFallback(this)">`).join("");
+  const gallery=`<div class="safe-gallery-v18"><img src="${esc(safeTerrainImage(m))}" alt="Imagen referencial de terreno" loading="lazy"><span>Imagen referencial de terreno</span></div>`;
   document.getElementById("modalBody").innerHTML=`
     <div class="modal-hero">
       ${cover?`<img src="${esc(cover)}" alt="" onerror="devImageFallback(this)">`:""}
