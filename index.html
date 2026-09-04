@@ -1961,7 +1961,7 @@ async function load(){
       fetchAll("precios_terrenos_limpio","select=*&ACTIVO=eq.true"),
       fetchAll("precios_terrenos","select=id,esquina_extra&activo=eq.true"),
       fetchAll("config_publica_v20","select=clave,valor"),
-      fetchAll("ubicaciones_oficinas","select=id,nombre,zona,direccion,maps_url,activo&activo=eq.true&order=id.asc")
+      fetchAll("ubicaciones_oficinas","select=id,nombre,zona,direccion,maps_url,activo&activo=eq.true&order=id.asc").catch(()=>[])
     ]);
     state.media=media;
     state.locations=locations;
