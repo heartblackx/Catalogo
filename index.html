@@ -1028,7 +1028,7 @@ function renderQuoteModal(){
       ${financeHtml}
       <form class="appointment-box" id="appointmentForm">
         <h3>Agenda tu cita</h3>
-        <p>Completa estos 4 datos. Al confirmar, Supabase asignará automáticamente el siguiente asesor disponible en el turno Eduardo → Carlos → Eduardo → Carlos.</p>
+        <p>Completa estos 4 datos para solicitar tu cita. Un asesor se pondrá en contacto contigo para dar seguimiento y confirmar los detalles.</p>
         <div class="appointment-grid">
           <div class="appointment-field"><label for="citaNombre">Nombre</label><input id="citaNombre" name="nombre" autocomplete="name" maxlength="80" placeholder="Tu nombre completo" required></div>
           <div class="appointment-field"><label for="citaTelefono">Teléfono</label><input id="citaTelefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" maxlength="18" placeholder="664 000 0000" required></div>
@@ -1081,7 +1081,7 @@ async function submitAppointment(e){
     return;
   }
 
-  msg.textContent="Confirmando tu cita y asignando asesor…";
+  msg.textContent="Confirmando tu cita…";
   btn.disabled=true;
   btn.textContent="Confirmando…";
 
@@ -1113,9 +1113,8 @@ async function submitAppointment(e){
       <div class="appointment-success">
         <div class="success-icon">✓</div>
         <h3>Cita confirmada</h3>
-        <p>Tu solicitud quedó guardada y fue asignada automáticamente. El asesor recibirá los datos del terreno y de tu cita.</p>
+        <p>Tu cita quedó registrada. Un asesor se pondrá en contacto contigo para dar seguimiento y confirmar los detalles.</p>
         <div class="success-details">
-          <div><small>Asesor</small><strong>${esc(data.asesor||"Asignado")}</strong></div>
           <div><small>Fecha y hora</small><strong>${esc(fecha)} · ${esc(hora)}</strong></div>
           <div><small>Desarrollo</small><strong>${esc(model.name)}</strong></div>
           <div><small>Terreno</small><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong></div>
