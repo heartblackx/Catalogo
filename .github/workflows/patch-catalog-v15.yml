@@ -1,0 +1,59 @@
+name: Patch catalog V15 customer appointment copy
+
+on:
+  push:
+    branches:
+      - assistant/citas-v15-cliente
+    paths:
+      - .github/workflows/patch-catalog-v15.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: assistant/citas-v15-cliente
+          fetch-depth: 0
+
+      - name: Patch customer-facing appointment copy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          replacements = {
+            'Completa estos 4 datos. Al confirmar, Supabase asignará automáticamente el siguiente asesor disponible en el turno Eduardo → Carlos → Eduardo → Carlos.':
+              'Completa estos 4 datos para solicitar tu cita. Un asesor se pondrá en contacto contigo para dar seguimiento y confirmar los detalles.',
+            'Confirmando tu cita y asignando asesor…':
+              'Confirmando tu cita…',
+            'Tu solicitud quedó guardada y fue asignada automáticamente. El asesor recibirá los datos del terreno y de tu cita.':
+              'Tu cita quedó registrada. Un asesor se pondrá en contacto contigo para dar seguimiento y confirmar los detalles.',
+            '<div><small>Asesor</small><strong>${esc(data.asesor||"Asignado")}</strong></div>\n          ':
+              '',
+          }
+
+          changed = False
+          for old, new in replacements.items():
+              if old in s:
+                  s = s.replace(old, new)
+                  changed = True
+
+          if not changed:
+              raise SystemExit('No se encontraron los textos esperados; no se modificó index.html')
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit patched index and remove one-time workflow
+        run: |
+          rm .github/workflows/patch-catalog-v15.yml
+          git config user.name "ChatGPT"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html .github/workflows/patch-catalog-v15.yml
+          git commit -m "Fix customer appointment copy and hide internal assignment"
+          git push origin assistant/citas-v15-cliente
