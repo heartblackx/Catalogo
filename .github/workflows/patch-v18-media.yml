@@ -1,0 +1,80 @@
+name: Patch catalog V18 safe media
+on:
+  push:
+    branches: ["assistant/catalog-v18-fotos-seguras-final2"]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: assistant/catalog-v18-fotos-seguras-final2
+      - name: Apply reviewed-media and Vive La Baja polish
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Social preview: use our reviewed terrain-only frame, not an external Concordia-hosted banner.
+          s=s.replace('https://grupoconcordia.info/gcexperience/Banners/VillaParaiso-VLB.jpg','https://catalogo.invierteinteligentetj.com/media/terreno-costa-seguro.jpg')
+
+          # Visible branding: offices and public copy stay as Vive La Baja.
+          s=s.replace('Proyecto Grupo Concordia','Vive La Baja')
+          s=s.replace('Estas ubicaciones se cargan desde la base de oficinas registrada en Supabase. Pulsa una oficina para abrir su liga de Google Maps.',
+                      'Consulta nuestros puntos de atención Vive La Baja. Pulsa una oficina para abrir su liga de Google Maps.')
+
+          # Temporary safe visual policy. The two local assets were reviewed: no constructed house is presented as part of a lot.
+          marker='const SAFE_TERRAIN_MEDIA_V18'
+          if marker not in s:
+              safe_js='''\nconst SAFE_TERRAIN_MEDIA_V18={\n  urbano:"media/terreno-seguro.jpg",\n  costa:"media/terreno-costa-seguro.jpg"\n};\nfunction safeTerrainImage(model={}){\n  const type=String(model.type||"").toLowerCase();\n  const zone=String((model.zones&&model.zones[0])||model.loc?.zona||"").toLowerCase();\n  return (type==="costa" || /rosarito|ensenada|costa|playa|mar/.test(zone))\n    ? SAFE_TERRAIN_MEDIA_V18.costa\n    : SAFE_TERRAIN_MEDIA_V18.urbano;\n}\n'''
+              s=s.replace('const state = {', safe_js+'\nconst state = {',1)
+
+          # Do not expose unreviewed automatic development media in the public catalog for now.
+          s=s.replace('cover:media[0]?.public_url || "",','cover:safeTerrainImage(c),',1)
+          s=re.sub(r'const gallery=m\.media\.slice\(0,5\)\.map\(x=>`<img src="\$\{esc\(x\.public_url\)\}" alt="" loading="lazy" onerror="devImageFallback\(this\)">`\)\.join\(""\);',
+                   'const gallery=`<div class="safe-gallery-v18"><img src="${esc(safeTerrainImage(m))}" alt="Imagen referencial de terreno" loading="lazy"><span>Imagen referencial de terreno</span></div>`;',s,count=1)
+
+          # Lot cards/quotes: use only reviewed terrain images until exact lot photos are manually approved.
+          s=re.sub(r'function getLotPhoto\(lot,model\)\{.*?return \{url:"",type:"ninguna"\};\n\}',
+                   'function getLotPhoto(lot,model){\n  return {url:safeTerrainImage(model),type:"referencial"};\n}',s,count=1,flags=re.S)
+          s=s.replace('${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}', '${photoInfo.type==="lote"?"Foto del lote":"Imagen referencial de terreno"}')
+
+          # Visual label on all temporary fallback imagery.
+          if 'CATALOGO_V18_SAFE_MEDIA_CSS' not in s:
+              css='''\n/* CATALOGO_V18_SAFE_MEDIA_CSS */\n.dev-photo,.mlot-photo,.quote-photo-slot{position:relative}\n.dev-photo::after,.mlot-photo::after,.quote-photo-slot::after{content:"Imagen referencial de terreno";position:absolute;left:10px;bottom:10px;z-index:4;padding:6px 9px;border-radius:999px;background:rgba(5,30,40,.82);color:#fff;font-size:.58rem;font-weight:900;letter-spacing:.02em;box-shadow:0 4px 12px rgba(0,0,0,.18)}\n.safe-gallery-v18{position:relative;width:100%;height:100%;min-height:150px;overflow:hidden;border-radius:16px}.safe-gallery-v18 img{width:100%;height:100%;object-fit:cover}.safe-gallery-v18 span{position:absolute;left:10px;bottom:10px;padding:6px 9px;border-radius:999px;background:rgba(5,30,40,.82);color:#fff;font-size:.58rem;font-weight:900}\n/* /CATALOGO_V18_SAFE_MEDIA_CSS */\n'''
+              s=s.replace('</style>',css+'\n</style>',1)
+
+          # Public office cards say Vive La Baja only.
+          s=s.replace('<span class="office-label">Oficina Vive La Baja</span>','<span class="office-label">Vive La Baja</span>')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          scripts=[]
+          for attrs,body in re.findall(r'<script([^>]*)>(.*?)</script>',s,re.S|re.I):
+              if 'application/ld+json' in attrs.lower():
+                  continue
+              if body.strip(): scripts.append(body)
+          Path('/tmp/catalog-v18-inline.js').write_text('\n;\n'.join(scripts),encoding='utf-8')
+          PY
+          node --check /tmp/catalog-v18-inline.js
+          grep -q 'SAFE_TERRAIN_MEDIA_V18' index.html
+          grep -q 'Imagen referencial de terreno' index.html
+          ! grep -q 'Proyecto Grupo Concordia' index.html
+
+          rm -f .github/workflows/patch-v18-media.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/patch-v18-media.yml
+          git commit -m "Use reviewed terrain-only media and Vive La Baja branding"
+          git push origin HEAD:assistant/catalog-v18-fotos-seguras-final2
