@@ -1,0 +1,33 @@
+name: Catalog V19 cleanup
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/catalog-v19-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch index
+        run: python .github/catalog_v19_patch.py
+      - name: Validate JavaScript
+        run: |
+          python -c "from pathlib import Path; import re; h=Path('index.html').read_text(encoding='utf-8'); a=re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>',h,flags=re.S|re.I); Path('/tmp/catalog-inline.js').write_text('\\n'.join(x for x in a if not x.lstrip().startswith('{')),encoding='utf-8')"
+          node --check /tmp/catalog-inline.js
+      - name: Commit
+        run: |
+          git config user.name catalog-maintenance-bot
+          git config user.email actions@users.noreply.github.com
+          git add index.html
+          git commit -m "fix: limpiar fotos y textos técnicos del catálogo"
+          git push origin HEAD:main
