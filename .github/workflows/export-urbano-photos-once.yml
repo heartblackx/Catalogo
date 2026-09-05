@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/export-urbano-photos-once.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,39 +13,27 @@ jobs:
   export:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Probe image access routes
+      - name: Probe host-only proxies
         shell: bash
         run: |
           set -u
-          url='https://lh3.googleusercontent.com/sitesv/AG8ngQWmZ_OzzYE5NDA2KJeZiQ_6izBuhfxz0IaPGsNZjS_aRNT5rdjT2UKWZnvrt50IeYcKyAf0TgJQ8_O1vpCsj2UQZMLkO7NekVvrVtdmStVOSydzWe9p24KwaDG2mXngQU3wjG5ALBlUcHWMA1kqHx4Htwaha7B3Q3W51wDVg92KmCs8EIacDpHHxNy-=w16383'
+          hp='lh3.googleusercontent.com/sitesv/AG8ngQWmZ_OzzYE5NDA2KJeZiQ_6izBuhfxz0IaPGsNZjS_aRNT5rdjT2UKWZnvrt50IeYcKyAf0TgJQ8_O1vpCsj2UQZMLkO7NekVvrVtdmStVOSydzWe9p24KwaDG2mXngQU3wjG5ALBlUcHWMA1kqHx4Htwaha7B3Q3W51wDVg92KmCs8EIacDpHHxNy-=w16383'
           enc=$(python - <<'PY'
           import urllib.parse
-          u='https://lh3.googleusercontent.com/sitesv/AG8ngQWmZ_OzzYE5NDA2KJeZiQ_6izBuhfxz0IaPGsNZjS_aRNT5rdjT2UKWZnvrt50IeYcKyAf0TgJQ8_O1vpCsj2UQZMLkO7NekVvrVtdmStVOSydzWe9p24KwaDG2mXngQU3wjG5ALBlUcHWMA1kqHx4Htwaha7B3Q3W51wDVg92KmCs8EIacDpHHxNy-=w16383'
-          print(urllib.parse.quote(u,safe=''))
+          hp='lh3.googleusercontent.com/sitesv/AG8ngQWmZ_OzzYE5NDA2KJeZiQ_6izBuhfxz0IaPGsNZjS_aRNT5rdjT2UKWZnvrt50IeYcKyAf0TgJQ8_O1vpCsj2UQZMLkO7NekVvrVtdmStVOSydzWe9p24KwaDG2mXngQU3wjG5ALBlUcHWMA1kqHx4Htwaha7B3Q3W51wDVg92KmCs8EIacDpHHxNy-=w16383'
+          print(urllib.parse.quote(hp,safe=''))
           PY
           )
-          hostpath=${url#https://}
           declare -a routes=(
-            "$url"
-            "https://external-content.duckduckgo.com/iu/?u=${enc}&f=1&nofb=1"
-            "https://proxy.duckduckgo.com/iu/?u=${enc}&f=1&nofb=1"
-            "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${enc}"
+            "https://wsrv.nl/?url=${hp}&output=jpg&q=95"
+            "https://images.weserv.nl/?url=${hp}&output=jpg&q=95"
             "https://wsrv.nl/?url=${enc}&output=jpg&q=95"
-            "https://images.weserv.nl/?url=${enc}&output=jpg&q=95"
-            "https://i0.wp.com/${hostpath}?ssl=1"
-            "https://i1.wp.com/${hostpath}?ssl=1"
+            "https://imageproxy.pimg.tw/resize?url=https%3A%2F%2F${enc}"
           )
           mkdir -p probes
           n=0
           for r in "${routes[@]}"; do
-            n=$((n+1))
-            echo "--- ROUTE $n ---"
-            echo "$r"
-            code=$(curl -L -sS --max-time 45 --connect-timeout 15 -A 'Mozilla/5.0' -e 'https://sites.google.com/' -o "probes/$n.bin" -w '%{http_code}' "$r" || true)
-            echo "HTTP $code"
-            ls -l "probes/$n.bin" 2>/dev/null || true
-            file "probes/$n.bin" 2>/dev/null || true
-            head -c 24 "probes/$n.bin" 2>/dev/null | xxd || true
+            n=$((n+1)); echo "--- $n $r";
+            code=$(curl -L -sS --max-time 60 --connect-timeout 15 -A 'Mozilla/5.0' -o "probes/$n.bin" -w '%{http_code}' "$r" || true)
+            echo "HTTP $code"; file "probes/$n.bin" 2>/dev/null || true; ls -l "probes/$n.bin" 2>/dev/null || true;
           done
-          find probes -type f -size +20k -print
