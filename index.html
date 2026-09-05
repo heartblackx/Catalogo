@@ -1551,13 +1551,21 @@ function modelMinDownAmount(model){
   return vals.length?Math.min(...vals):null;
 }
 
+// CLEAN_COSTA_MEDIA_V20
+const LOCAL_DEV_MEDIA = {"Sahara": ["./assets/desarrollos/costa/sahara/01.jpg", "./assets/desarrollos/costa/sahara/02.jpg", "./assets/desarrollos/costa/sahara/03.jpg"], "Vistas de Puerto Nuevo": ["./assets/desarrollos/costa/vistas-puerto-nuevo/01.jpg", "./assets/desarrollos/costa/vistas-puerto-nuevo/02.jpg", "./assets/desarrollos/costa/vistas-puerto-nuevo/03.jpg", "./assets/desarrollos/costa/vistas-puerto-nuevo/04.jpg"], "Cielo": ["./assets/desarrollos/costa/cielo/01.jpg"], "Santorini": ["./assets/desarrollos/costa/santorini/01.jpg", "./assets/desarrollos/costa/santorini/02.jpg", "./assets/desarrollos/costa/santorini/03.jpg", "./assets/desarrollos/costa/santorini/04.jpg"], "Puerto Escondido": ["./assets/desarrollos/costa/puerto-escondido/01.jpg", "./assets/desarrollos/costa/puerto-escondido/02.jpg", "./assets/desarrollos/costa/puerto-escondido/03.jpg"], "Costa Dorada Perla": ["./assets/desarrollos/costa/costa-dorada-perla/01.jpg"], "Villa Toscana": ["./assets/desarrollos/costa/villa-toscana/01.jpg", "./assets/desarrollos/costa/villa-toscana/02.jpg"]};
+
 function buildModels(){
   state.models = CATALOG.map(c=>{
     const lots=state.lots.filter(x=>related(x.desarrollo,c.members));
     const available=lots.filter(isLotAvailable);
-    const media=state.media
+    const syncedMedia=state.media
       .filter(x=>related(x.desarrollo,c.members) && x.activo!==false && x.public_url)
       .sort((a,b)=>(b.portada===true)-(a.portada===true)||(a.orden??99)-(b.orden??99));
+    const localEntry=Object.entries(LOCAL_DEV_MEDIA).find(([name])=>
+      canon(name)===canon(c.name) || (c.members||[]).some(member=>canon(member)===canon(name))
+    );
+    const localMedia=(localEntry?.[1]||[]).map((public_url,orden)=>({public_url,portada:orden===0,orden,local:true}));
+    const media=localMedia.length ? localMedia : syncedMedia;
     const loc=state.locations.find(x=>related(x.desarrollo,c.members) && x.activo!==false) || null;
     const lotMedia=state.lotMedia.filter(x=>related(x.desarrollo,c.members) && x.activo!==false);
 
