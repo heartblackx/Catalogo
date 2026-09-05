@@ -23,23 +23,18 @@ jobs:
           for c in google-chrome google-chrome-stable chromium chromium-browser; do
             if command -v "$c" >/dev/null 2>&1; then CHROME="$(command -v "$c")"; break; fi
           done
-          if [ -z "$CHROME" ]; then
-            echo "Chrome/Chromium not found" >&2
-            exit 1
-          fi
-          echo "Using $CHROME"
+          [ -n "$CHROME" ] || { echo "Chrome not found" >&2; exit 1; }
           mkdir -p campestre_fotos
           "$CHROME" --headless=new --no-sandbox --disable-gpu --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-profile about:blank >/tmp/chrome.log 2>&1 &
           CHROME_PID=$!
           trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
-          for i in $(seq 1 50); do
-            if curl -fsS http://127.0.0.1:9222/json/version >/dev/null; then break; fi
-            sleep 0.2
+          for i in $(seq 1 80); do
+            curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break
+            sleep 0.25
           done
           cat > /tmp/export.js <<'NODE'
           const fs = require('fs');
           const path = require('path');
-
           const siteUrl = 'https://sites.google.com/view/invierte-inteligente-tj/p%C3%A1gina-principal/campestre';
           const urls = [
             'https://lh3.googleusercontent.com/sitesv/AG8ngQWD_9I5czaAKAhE7PzruSVzsiD5LaCsSKlDPm02Mf4kshqBSFL_OKFUrUB5G9SUEg9itUWFKY06CYhf5uPnu1l-4W8q-3Bcgmrm6rrxibdz5LP2XTcbl6t0Pv3wq5uG3nZN6cQd_anHoHcFbH7vzWH9u6J4waYrgN34AdVOEce7yQZrWM83AbMPdXKn=w16383',
@@ -54,63 +49,69 @@ jobs:
             'https://lh3.googleusercontent.com/sitesv/AG8ngQVGEVqXqyVdWc607BhuVxMRL5fSKFj1aWs_ekWknGiN55atEW4C_BnGaQ-Sb0ZCS6SwrzS2M0lyu9lxvJ2G7rcB95mzT7ExKnYQljO5sH8aD65l5K-73FTvFQ36Ox4NeNWWegbInC8qMSRdYmHPfrqSmM1wovQoOLNXCNKydXa3PxytBFRO6ucusuf5kuQ=w16383',
             'https://lh3.googleusercontent.com/sitesv/AG8ngQXl9VRW0l8jUTwcsn3mfwo04yLqgDyzVUZaLV9_Y6vt4Vh71qZEOp8_HcRQO2Uzy4Tjf0DsUZdozrbKM9A96ziZaIUd7TGZMr4axjlnwqm63GxvcvuN1lrIghv9L2fKBoq5zQPuyDXmw_dYnIEk-U0Q8VHzmMAp_8wWtau5ZtqMrYac9sWbSy5wm6Qh=w16383'
           ];
-
-          const sleep = ms => new Promise(r => setTimeout(r, ms));
-          async function getPageWs() {
-            const r = await fetch('http://127.0.0.1:9222/json/new?about:blank', {method:'PUT'});
-            if (!r.ok) throw new Error('Cannot create target: '+r.status);
-            const j = await r.json();
-            return j.webSocketDebuggerUrl;
-          }
+          const sleep = ms => new Promise(r=>setTimeout(r,ms));
           async function main(){
-            const wsUrl = await getPageWs();
-            const ws = new WebSocket(wsUrl);
-            await new Promise((res, rej)=>{ ws.onopen=res; ws.onerror=rej; });
+            const t = await fetch('http://127.0.0.1:9222/json/new?about:blank',{method:'PUT'}).then(r=>r.json());
+            const ws = new WebSocket(t.webSocketDebuggerUrl);
+            await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
             let id=0; const pending=new Map(); const listeners=[];
-            ws.onmessage = ev => {
+            ws.onmessage=ev=>{
               const m=JSON.parse(ev.data);
-              if (m.id && pending.has(m.id)) { const p=pending.get(m.id); pending.delete(m.id); m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result); return; }
-              for (const fn of listeners) fn(m);
+              if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);return;}
+              for(const fn of [...listeners]) fn(m);
             };
-            const send=(method,params={})=>new Promise((resolve,reject)=>{ const n=++id; pending.set(n,{resolve,reject}); ws.send(JSON.stringify({id:n,method,params})); });
-            const waitEvent=(method, pred=()=>true, timeout=30000)=>new Promise((resolve,reject)=>{
-              const fn=m=>{ if(m.method===method && pred(m.params||{})){ clearTimeout(t); listeners.splice(listeners.indexOf(fn),1); resolve(m.params||{}); } };
-              listeners.push(fn); const t=setTimeout(()=>{ const i=listeners.indexOf(fn); if(i>=0)listeners.splice(i,1); reject(new Error('Timeout '+method)); },timeout);
-            });
-            await send('Page.enable'); await send('Network.enable', {maxTotalBufferSize:100000000,maxResourceBufferSize:50000000});
-            console.log('Opening site...');
-            let load=waitEvent('Page.loadEventFired',()=>true,60000); await send('Page.navigate',{url:siteUrl}); await load.catch(()=>{}); await sleep(2500);
-            for (let i=0;i<urls.length;i++){
-              const u=urls[i]; console.log(`PHOTO ${i+1}: ${u}`);
-              let reqId=null, mime='';
-              const respP = waitEvent('Network.responseReceived', p=>{
-                const ru=p.response?.url||'';
-                const same = ru===u || ru.startsWith(u.split('=w16383')[0]);
-                if (same) { reqId=p.requestId; mime=p.response.mimeType||''; console.log('response',p.response.status,mime,ru); return true; }
-                return false;
-              },60000);
-              load=waitEvent('Page.loadEventFired',()=>true,60000);
-              await send('Page.navigate',{url:u, referrer:siteUrl});
-              await respP;
-              await load.catch(()=>{});
-              if (!reqId || !mime.startsWith('image/')) throw new Error(`Not an image for ${i+1}: ${mime}`);
-              await sleep(300);
-              let body;
-              for(let a=0;a<10;a++){
-                try { body=await send('Network.getResponseBody',{requestId:reqId}); break; } catch(e){ await sleep(300); }
+            const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}))});
+            const waitEvent=(method,timeout=60000)=>new Promise((resolve,reject)=>{const fn=m=>{if(m.method===method){clearTimeout(tm);listeners.splice(listeners.indexOf(fn),1);resolve(m.params||{})}};listeners.push(fn);const tm=setTimeout(()=>{const k=listeners.indexOf(fn);if(k>=0)listeners.splice(k,1);reject(new Error('timeout '+method))},timeout)});
+            await send('Page.enable');
+            await send('Runtime.enable');
+            await send('Network.enable',{maxTotalBufferSize:150000000,maxResourceBufferSize:60000000});
+            await send('Network.setCacheDisabled',{cacheDisabled:true});
+            const targetIndex = new Map(urls.map((u,i)=>[u,i]));
+            const requestMeta = new Map();
+            const saved = new Map();
+            listeners.push(m=>{
+              if(m.method==='Network.responseReceived'){
+                const p=m.params||{}, u=p.response?.url||'';
+                if(targetIndex.has(u)){
+                  console.log('response',targetIndex.get(u)+1,p.response.status,p.response.mimeType,u);
+                  if(p.response.status===200 && (p.response.mimeType||'').startsWith('image/')) requestMeta.set(p.requestId,{url:u,mime:p.response.mimeType});
+                }
               }
-              if(!body) throw new Error('Could not get body '+(i+1));
-              const ext = mime.includes('webp')?'webp':mime.includes('png')?'png':mime.includes('jpeg')||mime.includes('jpg')?'jpg':'img';
-              const buf = body.base64Encoded ? Buffer.from(body.body,'base64') : Buffer.from(body.body,'binary');
-              const name=`campestre_${String(i+1).padStart(2,'0')}.${ext}`;
-              fs.writeFileSync(path.join('campestre_fotos',name),buf);
-              console.log('saved',name,buf.length);
+              if(m.method==='Network.loadingFinished' && requestMeta.has(m.params?.requestId)){
+                const rid=m.params.requestId, meta=requestMeta.get(rid);
+                (async()=>{
+                  try{
+                    const body=await send('Network.getResponseBody',{requestId:rid});
+                    const buf=body.base64Encoded?Buffer.from(body.body,'base64'):Buffer.from(body.body,'binary');
+                    const i=targetIndex.get(meta.url);
+                    const ext=meta.mime.includes('webp')?'webp':meta.mime.includes('png')?'png':'jpg';
+                    const name=`campestre_${String(i+1).padStart(2,'0')}.${ext}`;
+                    fs.writeFileSync(path.join('campestre_fotos',name),buf);
+                    saved.set(meta.url,name);
+                    console.log('saved',name,buf.length,'total',saved.size);
+                  }catch(e){console.error('save error',e.message)}
+                })();
+              }
+            });
+            let load=waitEvent('Page.loadEventFired');
+            await send('Page.navigate',{url:siteUrl});
+            await load.catch(()=>{});
+            await sleep(2500);
+            const expression = `(() => { const urls=${JSON.stringify(urls)}; window.__imgs=urls.map(u=>{const im=new Image();im.style.position='fixed';im.style.left='-99999px';im.style.width='1px';im.style.height='1px';im.src=u;document.body.appendChild(im);return im;}); return urls.length; })()`;
+            const ev=await send('Runtime.evaluate',{expression,returnByValue:true});
+            console.log('injected',ev.result?.value);
+            for(let s=0;s<80 && saved.size<urls.length;s++) await sleep(500);
+            console.log('final saved',saved.size,'of',urls.length);
+            if(saved.size!==urls.length){
+              console.log('missing',urls.filter(u=>!saved.has(u)));
+              process.exitCode=2;
             }
             ws.close();
           }
-          main().catch(e=>{ console.error(e); process.exit(1); });
+          main().catch(e=>{console.error(e);process.exit(1)});
           NODE
           node /tmp/export.js
+          test "$(find campestre_fotos -type f | wc -l)" -eq 11
           file campestre_fotos/*
           zip -j campestre_fotos.zip campestre_fotos/*
       - name: Upload ZIP
