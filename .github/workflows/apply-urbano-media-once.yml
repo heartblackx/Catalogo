@@ -23,7 +23,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          import json
+          import json,re
 
           urban=json.loads(Path('assets/desarrollos/urbano/media.json').read_text(encoding='utf-8'))
           expected={'Lomas del Valle':12,'Los Olivos':6,'Rancho Escondido':6,'Alamar Residencial':7,'Páramo':11}
@@ -40,17 +40,8 @@ jobs:
               raise SystemExit('LOCAL_DEV_MEDIA block not found')
           media=json.loads(text[start+len(marker):end])
           media.update(urban)
-          merged=marker+json.dumps(media,ensure_ascii=False,separators=(',',':'))
-          text=text[:start]+merged+text[end:]
+          text=text[:start]+marker+json.dumps(media,ensure_ascii=False,separators=(',',':'))+text[end:]
 
-          old='''  if(model.id==="otay-campestre" && Array.isArray(model.media) && model.media.length){
-            const key=`${lot.manzana||""}-${lot.lote||""}`;
-            let hash=0;
-            for(let i=0;i<key.length;i++) hash=((hash*31)+key.charCodeAt(i))>>>0;
-            const developmentPhoto=model.media[hash % model.media.length]?.public_url || model.cover || "";
-            if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};
-          }
-          '''
           new='''  if(Array.isArray(model.media) && model.media.length){
             const pool=model.media.filter(x=>x?.public_url);
             if(pool.length){
@@ -70,10 +61,10 @@ jobs:
             }
           }
           '''
-          if old in text:
-              text=text.replace(old,new,1)
-          elif 'const pool=model.media.filter(x=>x?.public_url);' not in text:
-              raise SystemExit('Development fallback block not found')
+          pattern=r'  if\(model\.id==="otay-campestre" && Array\.isArray\(model\.media\) && model\.media\.length\)\{.*?\n  \}\n(?=  const developmentPhoto=model\.cover \|\| "";)'
+          text,n=re.subn(pattern,new,text,count=1,flags=re.S)
+          if n!=1 and 'const pool=model.media.filter(x=>x?.public_url);' not in text:
+              raise SystemExit(f'Development fallback replacement count: {n}')
 
           text=text.replace('// CLEAN_COSTA_MEDIA_V20','// LOCAL_DEVELOPMENT_MEDIA_V21',1)
           path.write_text(text,encoding='utf-8')
