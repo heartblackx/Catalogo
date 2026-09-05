@@ -2,7 +2,8 @@ name: Patch urbano lot photos once
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - '.github/workflows/patch-urbano-lot-photos-once.yml'
   workflow_dispatch:
@@ -17,120 +18,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Patch development fallback rotation
+      - name: Patch index
+        run: python .github/patch_urbano_lot_photos.py
+      - name: Validate and publish
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          marker='function getLotPhoto(lot,model){'
-          if marker not in s:
-              raise SystemExit('getLotPhoto not found')
-
-          helper=r'''
-const DEVELOPMENT_FALLBACK_PHOTOS={
-  "lomas del valle":[
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWmZ_OzzYE5NDA2KJeZiQ_6izBuhfxz0IaPGsNZjS_aRNT5rdjT2UKWZnvrt50IeYcKyAf0TgJQ8_O1vpCsj2UQZMLkO7NekVvrVtdmStVOSydzWe9p24KwaDG2mXngQU3wjG5ALBlUcHWMA1kqHx4Htwaha7B3Q3W51wDVg92KmCs8EIacDpHHxNy-=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXYoysS1j_LYTBAYUyPMBa1wwuNckwdtFu8FxTVdyFKocKsmey7oIB6XU3FZnz6vjaWDCQktQK-bEYpUhLL9fmqxJF4IjsmvBB4rNleOqtWtLXYBgzYAep8Bhk4jvA3V0deWrjdSvN4p_L47uAqVBRjyQ6SZkadMENOBrJInn5lzw-pAzjwodh7TEEA51U=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQW-jJ_OtDOjUk0kFd6rZdVH0l-cPEQvGOIKvU47emmZu6SiB4MSSs5WRHlLAlSRVRSkEjqSQgrg3BL6Se36hlpvtDu4odbNpmdoOZWiKoVb84MbpnxdOVXCuNIbtAKHL3vQYRYkWMsXOoP8RDStDVuKKbHkY2GsWmCNvNlOW7oCtMCcyQz0oSgKmajGP3o=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWGN2IzD6pJzQx_TgBvkuDJ4Ax4EWxyUln53Fgx3raVLsJVqbwb4toE-cxwdpzcY9JhoyfIHNQ4mDUvIKS20tfV5RJMpwGfQg9VM59kHa3Q-H_uD7tpcbxK8Ktb6UzLZyw6LCtQKeCRm2YTNra1C5oG-xJ-jaGxG0dNYAcwmhLOqrLr9B0F5EQGjhze_1k=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQUWsJoFvG65fzhSOxUHJHALEWHp-wu9jDE9t5xrBUNUWw7iTO1vVuy5ABKZbsYl1dXQ4PO1RYKHYjFsqcfftekantJbB39UgNhmf0hoS8OmHQMItXperphR2RN5cnbbAZli_BgcSLtZJuQ-XA9JVi304P84Ld8RuCKsvbtgXSs4lGDprM7yhKUactAnHlo=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXBMWUCC8GaCj1OuL5aNqaKfJveUbnGI13Xj7imRNLtwjlP0Kk-sILURpOqx2mM8ESFbVR-Wc8wbjM1ajanNRI62xObPyScA502c7gzX33mMvwssg84_tWnca2_C9Tw7HqrJBo0wgsWJcsJhb3XRL7wp5QJNGBF18crTkXWADu89y5ekmeyRuQ-ewNH=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVCYNJ5VEzGd3WnnbLyUS-UX4sAx0dFa21OwVBp4QM2_Jc8BGgvwxyWpUfTeBWG-C7ROn7yBKq4B6Ahog5pJi1NoEJUq3bEIV0pczPSg1gPvQy9v_Mp4ma6PjgW1SV94GtdqD0pnHHk1bScHUErmFqtXrIOsJCNtpgxInYvQqHFgQBtWMPWoOEtZrCnBRo=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWhs_wthKRu3g9vLDEA3PmT18HtjgbNd45B1-GNAlriDoTN82s8Yak9ZTW6mwMsHzOjBWCiA9a6Z3RogA13k-jr66Ned_JwkcfSKKLbv73kvKqLip24kmPcbxBKTW6pr4jEtjWvOTUJqSnvpVBga5mxUjZnssvgJtvNXFod-oz27wUWeGWwDg6tjdshUas=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXCRBcxYq8Bh8QLh_uab_sKdWey7-YlRLlohzxRbO7YMVKCgEx3TN3BFpkpzSoN6pzAERz0vfm13sy-cltAKTowroF8ADBvI7-6EohAChCILXNwpgzDWDm7DyizNLLLUMrawj0IJPKb5iVUFmkjQ50SiP6EwE2hf4L9e1wzyVK7khUp9_wrdZwIWJYD=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVHuVI_P50TPCWfU9pGE_sRinFutQxEeEcFdeo60gH_oNxyEkyqRHu5UvBNsixSkKddJL6Kni36nt9iPK7_h6GkK2puWZNdM8ZY1M6pnvCc3g3IVSMMhxBEaIycWZtI9NPg__uqNZIFXN6kT1hPKlnDqtUx6S_eF2RTblooGfQDmDSCKXuUuzy5JBF9JgE=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVIWRRlWOPWTg3JyZSAG0UpSCubxnbfGTjzErIgAdwFo2PVgdn1qxdS-zsAhLJz3-rjEzC3Hgq7RlodvqJ1f-6A_1s9sl_uzQAzcAsIFhOFTn5oovk-tU6Wfkau7C41XChLS-2a6ocliLKA5GPO1hr719a8VbQ_G6VslkFQPl37y-HJZ0eY2slxBpI2ESo=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVwtZIFCMyJa84Vv_1jKq09URnbn3oWein-VvVUHTh82ExYqhPltjgh9q5kuw35OcOV6EQ4IGRkls5GwYrcVuh7VVWCcyl3QfT3XS8lz0ZtghFZccskyq9hHjKsaNnEClCxQWfBEziPjnPVXrnijx-UvFKCf8DOito12ptpXdI76nJFB27xrZqT96ZMVK8=w16383"
-  ],
-  "los olivos":[
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVGRemx_ClSFlXRXv8dKf_9XP-FCNiCU40Ydoh52sfkvPCT2ADwi66e59TxujV5oUB8l0VpMDa6bdU3OD9-ldfpQWlvLcLs7DMgBIeg-ZvNAUFLcN8sPrgWJM5w74E8yhKlSSUHnRTYnf2Nlc8n_SNj7RfV1jZxuHmpkbltm3CjtnK3ZMLQ8wslncqg=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVmnRaSM5ndiAIVcvm1_SHSfEB8cjvl-4tpB75yP40uTdvUiW5Dydde4sLroxeB-1uMfnPjWs0VPKwDb3I9mOTXgzBgBgYbca_yOyYDepjDbM0tjBt8OKXNNJ_IDA3dWbPuEeMli6bnRfSI_pFUN3Rw4HPn1uXlCbMls8Vdn-QgmfgbLYSBUAaMp3E-lac=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVhkmnjCj11nlO8q_qiuCyZuByOBejyxhM3MYudVclQ3vGjcgAaLNhLykIpp8-3S77g3Hm-vJCkAyg8SXp0ucVLOhl5X5H93bGe7_06eHCTtgAEt3yJUUDhE_TZVvHfD_8j-ujPaU3WDlr2cxR9lgwrZO9Ir--IKIfWFtiJLmvqXeLz73HAEgMbROq8=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQUZU2jTrnNCZs9PGN74W_p2l9yE8C_X-f4at_xugzQLjofZ2KQtYDJViFyd86mHFsY3k-g5EXQQKv0a-E3IHFPhYjsm8_gO_YHpM3LkLxC2Lo7qK2pPPQQX2vSebIit8R755Rvv89LBE4856L8y4Uba3iaYIGjiOHJunECCvblM2TCdye2M2kxcwzUp=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQUccffB4wyUImD9IlyPwTk7GAWgu4PmsMUwPLZjVMJs5wEvpBNYYttGxpyrey3htHSYtVfNyHDCJBoiiT3mBrY9bKEXwn-drKJJfdvOD5wyvqg8X0l5MEGn9XWjAgIxfrEX_Xfz4hYsYK4IsV1QNTacQ_IeI_uSjdbesHcLZenJkm9aAylfksqOaZBGuDQ=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQW0b8zTfskZYezf1bGBsBFhzi4_9EUtbXIgDhtJJBvtI12Q2g-zk3knBB227xTDD3cN7678l09HlopgYWbiuelgNcwUzDyroDk8Hg0VJGROOpIzZH4849_SiiH3ljT2_0Gs-KKTQpKudYd6qp8KcLJoqACVD9UU7iShJKjeRSIdGDYiE8vyWzh1XtQ1BkI=w16383"
-  ],
-  "rancho escondido":[
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWouqr7K8QHxtIcqLkzPxe1HOTT8jneabfjFlRrecIMMOVEc4iKAq-5PiYiF3EzYyDPakZrqWh_hNgbDgqBhvBQGTPPs0_18ZYn1EmqgJaTsE4PWdSPdiimyey2aDRDhhpTRuzlF_xCcb2gRn_EfuHQbbMsQ6R4Z3Jdak4hPFhEOmYJIXFt5PGDRg=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQX8IR3i3f7HGn5NFE9cMrxDw4PDRsGDQbTmkzu7N-uJMnV2ZzKOo3VZFVAzJ-NQDhlIGNuWHnfRSMUYzsugHDkhaILStIYUMMhWiH6Qb7SXE2KeupWr6oIaHa0obs3zWBGyMeJBGzreZf71qlcY2cga2psg-wSrylJia5V6Jzj3nQEXfZ7_xOw3JJgPVto=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQX0BR2KW_s19OFIkg6aBSKnn43eKosCI1m6dg5e37W_KC6-Fj99xNxRIaLCyV3fovFCGpfMZd6-0BGSq3nI4S8qQcvNOeCLZVUprHta5uki68L7Pa6uX8Ww7QEQ6x69HnMymVBXLoxhq7k9XEg3MqOPHbAgO7pt959b7elemXN9HH1sce1wvMFKi796Wq8=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWvc1q_YOojwJ1KuWwBib-t4_gDB3UbuR3HW84lhX0ek9KvBkI7PHSbot0NyEe-_Zlv_9weVTu6UgK_yuMelbLKGU612096jKmn5Onr3krY-wEmD5HS8r5x178Ib2pEoFX0xLEIUYZHdEgaR-H-jTMVZPt0wHrYNVBLc7KT_9GdzTvNPKsU6xx9oIkW=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWkM6Y7Cy7sBdIesBl05d3iIF8Xip0ymXZQnhrnYg0OeTwVkoIm2p2-MtKlOEcbh57GQBk9daWwL09i5oCftrjdSSceqWCu_PJoMVPXQdhcEoY00qVu_h6UUFI8gZDBhXTpmzOBJ-AwoJ0k1qLjSk3xlAr2MDjsr02v-6SwAZs3AhyHdAcBJl_CVvDMHas=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWHR_RNQ_AKeJ7E6kKNRth-gEtnQ8mIbhoVNATHFfsJb8dNNoAVAwZhld0P_QHh_1Q_5WA3DbdpGNMJYjO-7V0Q_IeZV1ONR5DtrVP_fft7BASVPpMBdACcav-zBuMR63xEK05p1lvARkpP234TZ7gdyoQaf4QdAa7cF1V7q0mGJsd_Tb-uPbxOejYG=w16383"
-  ],
-  "alamar":[
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQW_5KCn1x8_uqY20CbXx2ir5jKHrKyhGc45BpNkxstP3ibHibnB-WUE4ng0y7v7sxKI3W7JXKE2SQGojmPD7DjBWbGMX3v6sui_ltLCtcXTjrEfMmI9IuqOTQVcC_8FtFtHA0Dz8I7C_jrtb7vUKMjFkYKrdKE0DSa9_JX9VbSceQf78QXPW8jImANOcAs=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWrmQ4vxBq_GdBkxJMyGTXjlY9dydKex8m9y_NJaMYS7osAIjy-SpqihrxVm282T71_xu_oVxR-bx6hhBjFvGn9SDmvz3ml_H2Njffozqw6SvQMjMOYXApLEx9Kk9276pSoS1Lv9zYB2dJKi0FRM7OxUUvZDniRoxKjn-kxuzA04fDns4qVS3R6NMMcVyY=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVEYt9ZsMAlxCOfXeYoqgLKY1tlboSoAsqNVRLw0c5pLlvec1F7hZcJcfCbc07NiPowQkt0PyMlU-8oOvbx1u6QmTs6zt4aK2qL1iuEd4flebIDyYdoMbk6bMRvHwMqxobWxh7Ws4tPgm1Y_7EhkKqpsSMsYWpCNmHE9NTGTcOx0MvwVUP0NWtMOO1UHgo=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWf5XdyI0jZRoif9SJ5UAIo-gMcoAInPOFvuC0J72bD0Ph5YJAtPrcAwiAPY1cvHEESNVDil3CDTfrGJ1t7lIoTFYnHKElFJ4EDKlSKIDo_jEW1xrm29nEorPylYPNYbhXKgVNE7O-rMOTmgMKtTQG_Q_1cpXKkeBnniqjKYAtKOMtGua85UJFsMLtz1Cg=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVn4GPttwxjEgtQ9axccd7--3WgO6WRLN29O1ydp4YjcegtID-33M8WvLE4k8zDQVEN5MHtaHawPldGUQ_aszvwp_htgCZfoda5e8hgkAd95RuYLUxkcKIw7xdiCpFDopXxBdyhlr8Mq3D2yllXusiSS0_OD4fmredWJxJ7CkCgLLQBkWBXlBYaX_G1=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXmY9l1ibsXoBw5cW1hLc0iT_vFf0v9B5hHBihv5xJn9FhUUgbiZaPA1VrOvLZqNgQklgPosLhGDjimPnuoUnO7PPIyXSJx5IdjKblhFSVwG5mJ8LvM-mlp190Wff47YcBJbpBga3tc6Fl2eYv8AQ7BaEqOU1GaeuOWE7qXClzLF5-mPx0RUQuJ9g3G=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVgteKAfE1Js6XliPj1PvLIaW2o44rrye4opxiV8dTIevjsZTAe3MB0PXiXdC7t0MG5zSt7Oy9DKzggUOyQZWQH3mW99-Fdqt4-84gR-9tBc-NDwyGGDkamHBPt3Qjw9K8KuOzvIQH0XNloXTaXfSNl55FhWxfabTkHxLx_qELoFMjYcMcVv4KKkMZt=w16383"
-  ],
-  "paramo":[
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXMcYDVIltqH9tL74_GeD4jL4bhJRX0tzBhBEYDdb0bXjGHyygH0AI5Bz2b8E6O7YCZSyAjd3rA2EOVMMnEOZYGJWCs_vYBJPtAf7cmsfOFwI3d2RdyLiciHuZGByIWrr7XV4Oo-gLL2nd3TLW-b8qqpNxOSS9xVX8zz_BfphqOYYa2bVVt7duwKRBD=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXlt7wSJq18AHbfaPgwbO73wrxBxfn5EIHf5gK72-6BGhJHdX-JBZbSUQ3u_6ICNHL9T5T_XDH8l0T7Snt0EWeWQJsTJow4h1l_m-X-UUwmP3WrUYwcHRr0MFghPQlTvCRIPPgOCAHWa1EA7UGAOnw2sctZJ89JYwiU1iw2RdnFsqlOBUGMZqnVZ7I8-pg=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVehurMnrhJnUBUSuddii986jQE8vUjs7gJ4iWwEabOSWizS2FGawYl9V5lia2qHdHhClmr0UDXK_thaqKBPzRc2kJ-cfpmXut8EN4ZyoMkbmsqRmyS8sSa9KWgnCnxvFb_MSwUO-BwkWq_PyafDs2gkbWQtjz0AHO1pXEdA72Krjei8Y7HdtC-RZqk=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVuqRAfcq7unr8-W-2nCBO2V-ohwlruen4P52Pw1q6ZztEuRUn51GYneIwiEQwOO0qsGnOhy9IaYzKfQxV4h-ZfWd_k6zT6HVBzI5uzhErplG1LpADu4DZYmRbWFMp6D0_vw5nK093mjNXhieZYz5huTeJ_ohNb8-JyxIwuijRteSi04INX0jlA9BgQ4iY=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQU6UrOo_ZEQ_lfPhPLs67iOzrwM4dpho8uTD-RL63wi-0xeo9D3C9kC9cCyhJgfGk3QYD3VArmVkq2v0sm-U7ZqLEontvdBHk0NXARgMM4Vi30jhVFlosC52xe5WaO5wWYKwMXoFifLQDWj01DSeS9KUWwRmjFSgtn-AulIe1_m4uQtbydzlluwAIKSTY4=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWsPri7OYld4sbPKAT0TQzXADyamCqiVF3IW-qY3V7HwsJ5oICRvRQ-o31ztIt4JOAmH0XXWtJh8BmY4aaBs5S2-E0GfnQWLqYv6G9ltB_tJnytG3fS98fDJpROcDGTgXeblhtmE42Bvu0sb_Zx2BFeVDBEi0-SHyR_BsuIV0tf2zPw1zeI10yKuHb0Nls=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXjR_9_T3jhn-oPG9UW9niFl9Ih5iwZ5AEMEv4MfEH4MwAnewnxzNXvhAp13FMUYDSpIWMSeItu4ijpFgxIMSGF5EWIyeKUpo-ubCx2cw1zDuQ5x3NNERkNMWDdShdvT4UyVB_dq37xeuHeBale1laPiwj4kE1ryZpre0MBbt3j-pecOIELidZZ3LyTLF0=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQWwdT5CuIcBf5R3qgGdA2ILMihSqwz4NljnRQYLhfEdYNoTqQjBVQoy5Y6-OOB6tjbxbqqteCw6c9AB7jtTSF3H7-YYduwQ7ErAUOdQLlhysk3p6ot_tfzJZx_9Hxj07b_HFkYtuwRg4Qia14PYzDZKKUO2hPUtaYzFfHAPAE6AJGPgwdM39etf4-I6qMM=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQXHox-HZpSQV7gL0DHZ-WEEcBYHHc6j3DPgF4DBOJRgUSSCtDFzJH8F0OHlJWQMPxt1uMvzBNHI_cwMy3dERgczdN6VmbOsysSErqm8ykI8Pye1s9R0JEYoFmdhh7likfe6CxONDIC77nUEetSpgzc_UZbdmsukjsWJOIMsUs_3eUkl4IMnumIC_1Gv=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQUqT7dtAjTSfu6oXqYLMV9a5ccprqNMQqdy2ASOJqN5I23fslLMpnxCz-owX6MBDI4gu6GaaTqgBD08kktCd0E7UdHqWjUzxIajGbpUkGTaZ1q3FSrKjHQ3UIpH-ostLAx8BnqJjIDnLT_hE5iZHjvmhrZyucX-RuELR7rJvEI80LaR2qOrZrWs6Ue3dt0=w16383",
-    "https://lh3.googleusercontent.com/sitesv/AG8ngQVJNng1udXxJ3uzlVEp_mAxHkdD78YHhkAkStbItzTPaFCbgRikWR8t3GOtJC68CZGGbwQMDJg6139-DO8E_rQifvCgpcBJhD8KM45vsQPakYQ6rKw9qYAc9E_YQU33E-sdDZjXvTkl1_8i5vdaNaHyTgLOj7wDHBo4cqlY5qaOFedY2VCqyJQWQqlzm58=w16383"
-  ]
-};
-function developmentPhotoGroup(model,lot){
-  const raw=String(
-    lot?.desarrollo || lot?.development || model?.name || model?.nombre || model?.desarrollo ||
-    model?.cfg?.name || model?.cfg?.nombre || model?.cfg?.desarrollo || ""
-  );
-  const k=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-  if(k.includes("lomas")&&k.includes("valle")) return DEVELOPMENT_FALLBACK_PHOTOS["lomas del valle"];
-  if(k.includes("los olivos")) return DEVELOPMENT_FALLBACK_PHOTOS["los olivos"];
-  if(k.includes("rancho escondido")) return DEVELOPMENT_FALLBACK_PHOTOS["rancho escondido"];
-  if(k.includes("alamar")) return DEVELOPMENT_FALLBACK_PHOTOS["alamar"];
-  if(k.includes("paramo")) return DEVELOPMENT_FALLBACK_PHOTOS["paramo"];
-  return [];
-}
-function pickDevelopmentPhoto(model,lot){
-  const photos=developmentPhotoGroup(model,lot);
-  if(!photos.length) return "";
-  const seed=`${lot?.manzana||""}|${lot?.lote||""}|${lot?.id||lot?.inventorynumber||""}`;
-  let h=0;
-  for(let i=0;i<seed.length;i++) h=((h<<5)-h+seed.charCodeAt(i))|0;
-  return photos[(h>>>0)%photos.length] || photos[0] || "";
-}
-'''
-          if 'const DEVELOPMENT_FALLBACK_PHOTOS=' not in s:
-              s=s.replace(marker, helper+'\n'+marker, 1)
-
-          old='const developmentPhoto=model.cover || "";'
-          new='const developmentPhoto=pickDevelopmentPhoto(model,lot) || model.cover || "";'
-          if old not in s and new not in s:
-              raise SystemExit('development fallback line not found')
-          if new not in s:
-              s=s.replace(old,new,1)
-
-          # Safety checks: individual lot photo and lot-specific multimedia must remain ahead of development fallback.
-          start=s.index(marker)
-          block=s[start:start+1800]
-          direct=block.find('foto_lote_public_url')
-          lotmedia=block.find('model.lotMedia')
-          fallback=block.find('pickDevelopmentPhoto(model,lot)')
-          if not (0 <= direct < lotmedia < fallback):
-              raise SystemExit(f'priority order invalid: direct={direct}, lotmedia={lotmedia}, fallback={fallback}')
-          if 'Imagen del desarrollo' not in s:
-              raise SystemExit('required fallback label missing')
-
-          p.write_text(s,encoding='utf-8')
-          print('Patched index.html; direct lot photos retain priority, development images rotate by lot.')
-          PY
           git diff --check
           grep -q 'pickDevelopmentPhoto(model,lot) || model.cover || ""' index.html
           git config user.name 'github-actions[bot]'
