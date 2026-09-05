@@ -1,0 +1,66 @@
+name: Apply Otay Campestre media once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-otay-campestre-media-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Campestre photos and rotate them across lots
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          photos=[
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQXl9VRW0l8jUTwcsn3mfwo04yLqgDyzVUZaLV9_Y6vt4Vh71qZEOp8_HcRQO2Uzy4Tjf0DsUZdozrbKM9A96ziZaIUd7TGZMr4axjlnwqm63GxvcvuN1lrIghv9L2fKBoq5zQPuyDXmw_dYnIEk-U0Q8VHzmMAp_8wWtau5ZtqMrYac9sWbSy5wm6Qh=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQVfB2stMHr6Vj_KVxwYfVn-CHsOuXCZuuSe3NGpJuXzOZWhhYUIwW1pHz0rO_QnA6Tnsd1icLScXNKGqWNuGgs_B06l4B1IIDALT3XiLkG_EgABu_VLWVUC5z73gYHM9PPSE1j1R__k-ABJ1kG_hzGsMAU2NTQY7pxobf8kHyT-JPLvc5ZtfVXgPVdA=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQXX53BIkOEtNetwqDB46mOKU0Zx1fiQzRgsz4XkwDZefvy64ugWJLS6GCqs56RZgb6kO-z5dDvMOqHgBSEnRwXSFR9Yfn4Cygt9VR1WbMpMyq1H6FVKC-063fT2Ulpxw4G4i8cGBOZIzLI84yLsoVkaHg6ertj-XxWCrThnwaDnbYJV5gQJ0GLUHQXw=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQX-6PuLuBEfH847B3nnXgrRCVbdCfeiUeybjD2REETQ8z5eUzot3Oh_9MXlC5oC2edcrXD5YBxqQmhYl61_4q9ZzU-wb-h90vTYj532SZ_RpCQr3o_V9fECdb2igJ2rmSYyInq-9hhd8mJsugqHasuh3PsyByQ4EtJ8lkC-99kzv8B0ngv-Ng0Zd2bU=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQWQyg2V-lyUIwCKfaH_RDa1LtMgDaRJswVHyQDRdCzRepjPyktlCeD9Y4CwoucHZV8WFnkN7VpnAtGgipP_Xr1_MVWKQUc8RPaUq_7J7dKV3SOFL5F92APH-GeBq6PxbIiiaOrVYQXAzALCqxwNhqYrTWXM_uHvHlOxGSZawOntzc8XdOc0pYRgI7su9lw=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQUl-vj6m69Hf_ApaejM2D8PxIdewO7Yii1PER0pmJV2z4h0gdddKZ_diWEojJUl6lJtbk10x_m2RnCfkjOiDzTSxy59AdD1wmWwlgOGGwDDwpkTTcbPADwUpSWOT8U4LTA2MfxjqCx4JjJ8SwmcxOsDVb2Z7TzFDmVzjwwy-Ux99i-rCd-97o2MvjciFFk=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQXE0YDiXlj1JgwBXHABc96BCAS5j-on_tKvc1MKaKtGTVEPZYqlWJYgYuYs3YClavUmPXP2EWyzbm9vJwmcALxfHSJ3zW0DNo6rSo9veIFtv0y3j2mbAIVPojIVvIVB2qAjd3kxKIO5hbyBqYdDPkk2EAjmXN02wdTaCsPtzY-9e70HDnBFFV5iJy94cw0=w16383#campestre-clean',
+            'https://lh3.googleusercontent.com/sitesv/AG8ngQVGEVqXqyVdWc607BhuVxMRL5fSKFj1aWs_ekWknGiN55atEW4C_BnGaQ-Sb0ZCS6SwrzS2M0lyu9lxvJ2G7rcB95mzT7ExKnYQljO5sH8aD65l5K-73FTvFQ36Ox4NeNWWegbInC8qMSRdYmHPfrqSmM1wovQoOLNXCNKydXa3PxytBFRO6ucusuf5kuQ=w16383#campestre-clean'
+          ]
+
+          # Extend the existing local-media override without touching the other developments.
+          m=re.search(r'const LOCAL_DEV_MEDIA = (\{.*?\});',s,re.S)
+          if not m:
+            raise SystemExit('LOCAL_DEV_MEDIA not found')
+          data=json.loads(m.group(1))
+          data['Otay Campestre']=photos
+          replacement='const LOCAL_DEV_MEDIA = '+json.dumps(data,ensure_ascii=False,separators=(',',':'))+';'
+          s=s[:m.start()]+replacement+s[m.end():]
+
+          # Different Campestre lots can show different real development photos when they lack an individual lot photo.
+          old='''  const developmentPhoto=model.cover || "";\n  if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};\n  return {url:"",type:"ninguna"};'''
+          new='''  if(model.id==="otay-campestre" && Array.isArray(model.media) && model.media.length){\n    const key=`${lot.manzana||""}-${lot.lote||""}`;\n    let hash=0;\n    for(let i=0;i<key.length;i++) hash=((hash*31)+key.charCodeAt(i))>>>0;\n    const developmentPhoto=model.media[hash % model.media.length]?.public_url || model.cover || "";\n    if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};\n  }\n  const developmentPhoto=model.cover || "";\n  if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};\n  return {url:"",type:"ninguna"};'''
+          if old not in s:
+            raise SystemExit('getLotPhoto fallback block not found')
+          s=s.replace(old,new,1)
+
+          marker='/* OTAY_CAMPESTRE_CLEAN_MEDIA */'
+          if marker not in s:
+            css='''\n/* OTAY_CAMPESTRE_CLEAN_MEDIA */\nimg[src*="#campestre-clean"]{object-position:50% 0!important}\n.dev-photo img[src*="#campestre-clean"]{transform:scale(1.14)!important;transform-origin:50% 0!important}\n.modal-hero img[src*="#campestre-clean"],.gallery img[src*="#campestre-clean"],.mlot-photo img[src*="#campestre-clean"],.quote-photo-slot img[src*="#campestre-clean"]{object-position:50% 0!important;transform:scale(1.16)!important;transform-origin:50% 0!important}\n'''
+            s=s.replace('/* CATALOGO_V17_TRUST_CSS */',css+'\n/* CATALOGO_V17_TRUST_CSS */',1)
+
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name "heartblackx"
+          git config user.email "edy260398@gmail.com"
+          git add index.html
+          git commit -m "feat: agregar fotos de Otay Campestre al catálogo"
+          git push origin main
