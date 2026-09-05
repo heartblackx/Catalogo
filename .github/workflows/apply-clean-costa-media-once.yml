@@ -1,0 +1,133 @@
+name: Apply clean Costa media once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-clean-costa-media-once.yml
+
+permissions:
+  contents: write
+
+env:
+  SITE_URL: https://sites.google.com/view/invierte-inteligente-tj/p%C3%A1gina-principal/costa
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Download reviewed real photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36' "$SITE_URL" -o /tmp/site.html
+          python - <<'PY'
+          import re,html,pathlib,urllib.parse,subprocess,shutil
+
+          raw=pathlib.Path('/tmp/site.html').read_text(encoding='utf-8',errors='ignore')
+          raw=html.unescape(raw).replace('\\u003d','=').replace('\\u0026','&').replace('\\/','/').replace('\\_','_')
+          names=['Sahara','Vistas de Puerto Nuevo','Cielo','Santorini','Puerto Escondido','Costa Dorada Perla','Villa Toscana']
+          # Reviewed selection by relative position inside each development section.
+          # Excluded: logos, visibly constructed homes, strongly recolored/green image, and unusable/missing files.
+          picks={
+            'Sahara':[3,1,4],
+            'Vistas de Puerto Nuevo':[1,3,2,4],
+            'Cielo':[6],
+            'Santorini':[2,3,4,5],
+            'Puerto Escondido':[1,3,5],
+            'Costa Dorada Perla':[3],
+            'Villa Toscana':[3,4],
+          }
+          slugs={
+            'Sahara':'sahara',
+            'Vistas de Puerto Nuevo':'vistas-puerto-nuevo',
+            'Cielo':'cielo',
+            'Santorini':'santorini',
+            'Puerto Escondido':'puerto-escondido',
+            'Costa Dorada Perla':'costa-dorada-perla',
+            'Villa Toscana':'villa-toscana',
+          }
+          starts=[m.start() for m in re.finditer(r'<section\b',raw,re.I)]
+          starts.append(len(raw))
+          bydev={}
+          for a,b in zip(starts,starts[1:]):
+              sec=raw[a:b]
+              dev=next((n for n in names if n.lower() in sec.lower()),None)
+              if not dev: continue
+              urls=[]
+              for u in re.findall(r'https://lh3\.googleusercontent\.com/sitesv/[A-Za-z0-9_\-=]+',sec):
+                  if u not in urls: urls.append(u)
+              bydev[dev]=urls
+
+          root=pathlib.Path('assets/desarrollos/costa')
+          root.mkdir(parents=True,exist_ok=True)
+          manifest={}
+          for dev,positions in picks.items():
+              urls=bydev.get(dev,[])
+              if max(positions)>len(urls):
+                  raise SystemExit(f'{dev}: solo {len(urls)} fotos disponibles, se pidieron posiciones {positions}')
+              folder=root/slugs[dev]
+              if folder.exists(): shutil.rmtree(folder)
+              folder.mkdir(parents=True)
+              manifest[dev]=[]
+              for outnum,pos in enumerate(positions,1):
+                  u=urls[pos-1]
+                  proxy='https://images.weserv.nl/?url='+urllib.parse.quote(u,safe='')+'&output=jpg&q=100'
+                  out=folder/f'{outnum:02d}.jpg'
+                  cmd=['curl','-L','--fail','--retry','2','--max-time','50','-A','Mozilla/5.0',proxy,'-o',str(out)]
+                  subprocess.run(cmd,check=True)
+                  if out.stat().st_size < 1000:
+                      raise SystemExit(f'Archivo inválido: {out}')
+                  manifest[dev].append('./'+out.as_posix())
+                  print(dev,pos,'->',out,out.stat().st_size)
+
+          # Patch page so reviewed local images replace the old remote development gallery/cover.
+          p=pathlib.Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          marker='// CLEAN_COSTA_MEDIA_V20'
+          if marker not in text:
+              mapping='const LOCAL_DEV_MEDIA = '+repr(manifest).replace("'",'\"')+';\n'
+              # repr replacement is safe here because values/names contain no embedded quotes.
+              mapping=marker+'\n'+mapping
+              text=text.replace('function buildModels(){',mapping+'\nfunction buildModels(){',1)
+
+              old='''    const media=state.media\n      .filter(x=>related(x.desarrollo,c.members) && x.activo!==false && x.public_url)\n      .sort((a,b)=>(b.portada===true)-(a.portada===true)||(a.orden??99)-(b.orden??99));'''
+              new='''    const syncedMedia=state.media\n      .filter(x=>related(x.desarrollo,c.members) && x.activo!==false && x.public_url)\n      .sort((a,b)=>(b.portada===true)-(a.portada===true)||(a.orden??99)-(b.orden??99));\n    const localEntry=Object.entries(LOCAL_DEV_MEDIA).find(([name])=>\n      canon(name)===canon(c.name) || (c.members||[]).some(member=>canon(member)===canon(name))\n    );\n    const localMedia=(localEntry?.[1]||[]).map((public_url,orden)=>({public_url,portada:orden===0,orden,local:true}));\n    const media=localMedia.length ? localMedia : syncedMedia;'''
+              if old not in text:
+                  raise SystemExit('No se encontró el bloque media esperado en index.html')
+              text=text.replace(old,new,1)
+              p.write_text(text,encoding='utf-8')
+          else:
+              print('El parche de imágenes limpias ya estaba aplicado.')
+          PY
+      - name: Validate catalog JavaScript
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re,pathlib
+          t=pathlib.Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',t,re.S|re.I)
+          js='\n'.join(b for b in blocks if 'function buildModels' in b or 'const CATALOG' in b)
+          pathlib.Path('/tmp/catalog-check.js').write_text(js,encoding='utf-8')
+          PY
+          node --check /tmp/catalog-check.js
+          grep -q 'CLEAN_COSTA_MEDIA_V20' index.html
+          test -s assets/desarrollos/costa/sahara/01.jpg
+          test -s assets/desarrollos/costa/vistas-puerto-nuevo/01.jpg
+          test -s assets/desarrollos/costa/cielo/01.jpg
+          test -s assets/desarrollos/costa/santorini/01.jpg
+          test -s assets/desarrollos/costa/puerto-escondido/01.jpg
+          test -s assets/desarrollos/costa/costa-dorada-perla/01.jpg
+          test -s assets/desarrollos/costa/villa-toscana/01.jpg
+      - name: Commit reviewed photos and catalog integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'heartblackx'
+          git config user.email 'edy260398@gmail.com'
+          git add index.html assets/desarrollos/costa
+          git commit -m 'feat: usar fotos reales revisadas en desarrollos Costa'
+          git push origin main
