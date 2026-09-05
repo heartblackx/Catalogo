@@ -92,7 +92,7 @@ jobs:
               if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};
             }
           }
-'''
+          '''
           text=text[:s]+new+text[e:]
           text=text.replace('// CLEAN_COSTA_MEDIA_V20','// LOCAL_DEVELOPMENT_MEDIA_V21',1)
           path.write_text(text,encoding='utf-8')
