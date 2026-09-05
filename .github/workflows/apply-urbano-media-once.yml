@@ -21,41 +21,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL --retry 3 --connect-timeout 20 --max-time 120 \
-            -A 'Mozilla/5.0' \
-            'https://sites.google.com/view/invierte-inteligente-tj/p%C3%A1gina-principal/urbano' \
-            -o /tmp/urbano.html
-
           python - <<'PY'
           from pathlib import Path
-          import json,re
+          import json
 
-          src=Path('/tmp/urbano.html').read_text(encoding='utf-8',errors='ignore')
-          src=src.replace('\\://','://').replace('\\_','_').replace('\\/','/').replace('\\=','=')
-          starts=[m.start() for m in re.finditer(r'aria-label="Carrusel de imágenes"',src)]
-          cars=[]
-          for i,start in enumerate(starts):
-              end=starts[i+1] if i+1<len(starts) else len(src)
-              block=src[start:end]
-              urls=[]
-              for u in re.findall(r'https://lh3\.googleusercontent\.com/sitesv/[A-Za-z0-9_\-=]+',block):
-                  if u not in urls: urls.append(u)
-              cars.append(urls)
-
-          if len(cars)<6:
-              raise SystemExit(f'Expected at least 6 carousels, found {len(cars)}')
-          expected=[12,6,6,7,11]
-          actual=[len(cars[i]) for i in range(1,6)]
+          urban=json.loads(Path('assets/desarrollos/urbano/media.json').read_text(encoding='utf-8'))
+          expected={'Lomas del Valle':12,'Los Olivos':6,'Rancho Escondido':6,'Alamar Residencial':7,'Páramo':11}
+          actual={k:len(urban.get(k,[])) for k in expected}
           if actual!=expected:
-              raise SystemExit(f'Unexpected URBANO carousel counts: {actual}, expected {expected}')
-
-          urban={
-              'Lomas del Valle':cars[1],
-              'Los Olivos':cars[2],
-              'Rancho Escondido':cars[3],
-              'Alamar Residencial':cars[4],
-              'Páramo':cars[5],
-          }
+              raise SystemExit(f'Unexpected verified URBANO media counts: {actual}')
 
           path=Path('index.html')
           text=path.read_text(encoding='utf-8')
@@ -69,11 +43,14 @@ jobs:
           merged=marker+json.dumps(media,ensure_ascii=False,separators=(',',':'))
           text=text[:start]+merged+text[end:]
 
-          old_start='  if(model.id==="otay-campestre" && Array.isArray(model.media) && model.media.length){'
-          s=text.find(old_start)
-          e=text.find('  const developmentPhoto=model.cover || "";',s)
-          if s<0 or e<0:
-              raise SystemExit('Old development fallback block not found')
+          old='''  if(model.id==="otay-campestre" && Array.isArray(model.media) && model.media.length){
+            const key=`${lot.manzana||""}-${lot.lote||""}`;
+            let hash=0;
+            for(let i=0;i<key.length;i++) hash=((hash*31)+key.charCodeAt(i))>>>0;
+            const developmentPhoto=model.media[hash % model.media.length]?.public_url || model.cover || "";
+            if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};
+          }
+          '''
           new='''  if(Array.isArray(model.media) && model.media.length){
             const pool=model.media.filter(x=>x?.public_url);
             if(pool.length){
@@ -93,7 +70,11 @@ jobs:
             }
           }
           '''
-          text=text[:s]+new+text[e:]
+          if old in text:
+              text=text.replace(old,new,1)
+          elif 'const pool=model.media.filter(x=>x?.public_url);' not in text:
+              raise SystemExit('Development fallback block not found')
+
           text=text.replace('// CLEAN_COSTA_MEDIA_V20','// LOCAL_DEVELOPMENT_MEDIA_V21',1)
           path.write_text(text,encoding='utf-8')
           PY
