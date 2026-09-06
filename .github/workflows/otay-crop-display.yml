@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-      - name: Aplicar recorte limpio a las fotos de Otay Campestre
+      - name: Aplicar recorte limpio a Otay Campestre
         shell: bash
         run: |
           python - <<'PY'
@@ -26,29 +26,7 @@ jobs:
           s=p.read_text(encoding='utf-8')
           marker='OTAY_CAMPESTRE_CROP_V1'
           if marker not in s:
-              patch=r'''
-<!-- OTAY_CAMPESTRE_CROP_V1 -->
-<style>
-img[src*="#otay-crop"]{transform:scale(1.38);transform-origin:50% 12%;object-position:center 12%!important}
-</style>
-<script>
-(function(){
-  function cropOtay(root){
-    (root||document).querySelectorAll('img[src*="#otay-crop"]').forEach(function(img){
-      var p=img.parentElement;
-      if(p){p.style.overflow='hidden';}
-      img.style.transform='scale(1.38)';
-      img.style.transformOrigin='50% 12%';
-      img.style.objectPosition='center 12%';
-    });
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){cropOtay(document)});
-  else cropOtay(document);
-  new MutationObserver(function(m){m.forEach(function(x){x.addedNodes.forEach(function(n){if(n.nodeType===1){if(n.matches&&n.matches('img[src*="#otay-crop"]')) cropOtay(n.parentElement||n); else if(n.querySelectorAll) cropOtay(n);}})})}).observe(document.documentElement,{childList:true,subtree:true});
-})();
-</script>
-<!-- /OTAY_CAMPESTRE_CROP_V1 -->
-'''
+              patch='<!-- OTAY_CAMPESTRE_CROP_V1 -->\n<style>img[src*="#otay-crop"]{transform:scale(1.38);transform-origin:50% 12%;object-position:center 12%!important}</style>\n<script>(function(){function c(r){(r||document).querySelectorAll(\'img[src*="#otay-crop"]\').forEach(function(i){var p=i.parentElement;if(p)p.style.overflow="hidden";i.style.transform="scale(1.38)";i.style.transformOrigin="50% 12%";i.style.objectPosition="center 12%"})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){c(document)});else c(document);new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1){if(n.matches&&n.matches(\'img[src*="#otay-crop"]\'))c(n.parentElement||n);else if(n.querySelectorAll)c(n)}})})}).observe(document.documentElement,{childList:true,subtree:true})})();</script>\n<!-- /OTAY_CAMPESTRE_CROP_V1 -->'
               s=s.replace('</body>',patch+'\n</body>',1)
               p.write_text(s,encoding='utf-8')
           PY
