@@ -1,0 +1,74 @@
+name: Publish Lomas del Valle and Lomas del Prado
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/media_parts/lomas_bundle_*.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Decode Lomas del Valle gallery and patch catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/media_parts/lomas_bundle_*.txt > /tmp/lomas_bundle.json
+          python - <<'PY'
+          from pathlib import Path
+          import base64, json, re
+
+          data=json.loads(Path('/tmp/lomas_bundle.json').read_text())
+          out=Path('assets/desarrollos/urbano/lomas-del-valle')
+          out.mkdir(parents=True,exist_ok=True)
+          for name,b64 in data.items():
+              (out/name).write_bytes(base64.b64decode(b64))
+
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Add Lomas del Prado to the visible catalog. Inventory, prices and location
+          # continue to come from Supabase under the exact development name.
+          if 'name:"Lomas del Prado"' not in s:
+              anchor='  {\n    id:"los-olivos", name:"Los Olivos"'
+              obj='''  {\n    id:"lomas-del-prado", name:"Lomas del Prado", members:["Lomas del Prado"], priceNames:["Lomas del Prado"], siteImage:"https://grupoconcordia.info/gcexperience/Banners/LomasPrado-VLB.jpg", type:"urbano",\n    description:"Desarrollo en Tijuana con inventario disponible. Consulta lotes, medidas, ubicación y opciones de financiamiento directamente con la información vigente del catálogo.",\n    amenities:["Tijuana","Inventario disponible","Opciones de financiamiento"]\n  },\n'''
+              if anchor not in s:
+                  raise SystemExit('No se encontró el punto de inserción antes de Los Olivos')
+              s=s.replace(anchor,obj+anchor,1)
+
+          # Make the 10 local images the official gallery for Lomas del Valle.
+          m=re.search(r'const LOCAL_DEV_MEDIA = (\{.*?\});',s)
+          if not m:
+              raise SystemExit('No se encontró LOCAL_DEV_MEDIA')
+          media=json.loads(m.group(1))
+          media['Lomas del Valle']=[f'./assets/desarrollos/urbano/lomas-del-valle/lomas_del_valle_{i:02d}.jpg' for i in range(1,11)]
+          replacement='const LOCAL_DEV_MEDIA = '+json.dumps(media,separators=(',',':'),ensure_ascii=False)+';'
+          s=s[:m.start()]+replacement+s[m.end():]
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Publish changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/desarrollos/urbano/lomas-del-valle
+          git rm -f .github/media_parts/lomas_bundle_*.txt
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "feat: publicar fotos de Lomas del Valle y agregar Lomas del Prado"
+          git pull --rebase origin main
+          git push origin HEAD:main
