@@ -1,0 +1,42 @@
+name: Assemble Lomas del Valle photos
+
+on:
+  push:
+    branches:
+      - lomas-del-valle-fotos
+    paths:
+      - '.upload-lomas/READY'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout upload branch
+        uses: actions/checkout@v4
+        with:
+          ref: lomas-del-valle-fotos
+
+      - name: Reconstruct photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .upload-lomas/part-*.txt > /tmp/lomas.zip.b64
+          base64 -d /tmp/lomas.zip.b64 > /tmp/lomas.zip
+          rm -rf assets/lomas-del-valle
+          mkdir -p assets/lomas-del-valle
+          unzip -j /tmp/lomas.zip 'lomas_web/*.jpg' -d assets/lomas-del-valle
+          rm -rf .upload-lomas
+
+      - name: Commit photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add clean Lomas del Valle gallery"
+          git push origin HEAD:lomas-del-valle-fotos
