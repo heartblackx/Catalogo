@@ -1,0 +1,63 @@
+name: Otay Campestre crop display
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/otay-crop-display.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Aplicar recorte limpio a las fotos de Otay Campestre
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='OTAY_CAMPESTRE_CROP_V1'
+          if marker not in s:
+              patch=r'''
+<!-- OTAY_CAMPESTRE_CROP_V1 -->
+<style>
+img[src*="#otay-crop"]{transform:scale(1.38);transform-origin:50% 12%;object-position:center 12%!important}
+</style>
+<script>
+(function(){
+  function cropOtay(root){
+    (root||document).querySelectorAll('img[src*="#otay-crop"]').forEach(function(img){
+      var p=img.parentElement;
+      if(p){p.style.overflow='hidden';}
+      img.style.transform='scale(1.38)';
+      img.style.transformOrigin='50% 12%';
+      img.style.objectPosition='center 12%';
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){cropOtay(document)});
+  else cropOtay(document);
+  new MutationObserver(function(m){m.forEach(function(x){x.addedNodes.forEach(function(n){if(n.nodeType===1){if(n.matches&&n.matches('img[src*="#otay-crop"]')) cropOtay(n.parentElement||n); else if(n.querySelectorAll) cropOtay(n);}})})}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+<!-- /OTAY_CAMPESTRE_CROP_V1 -->
+'''
+              s=s.replace('</body>',patch+'\n</body>',1)
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Publicar ajuste
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "feat: mostrar fotos limpias de Otay Campestre"
+          git push origin HEAD:main
