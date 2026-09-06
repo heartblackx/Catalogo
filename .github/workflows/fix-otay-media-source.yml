@@ -1,0 +1,56 @@
+name: Fix Otay Campestre media source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-otay-media-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Stop using blocked Google Sites media for Otay Campestre
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Otay was hard-coded in LOCAL_DEV_MEDIA with Google Sites URLs that
+          # return 403. LOCAL_DEV_MEDIA has priority over Supabase, so those
+          # broken links hid the valid synced photos and left the card blank.
+          pattern = r',"Otay Campestre":\[(?:"[^"]*"(?:,\s*)?)+\](?=};)'
+          s2, n = re.subn(pattern, '', s, count=1)
+          if n != 1:
+              raise SystemExit(f'Expected one Otay LOCAL_DEV_MEDIA entry, found {n}')
+
+          p.write_text(s2, encoding='utf-8')
+          PY
+
+      - name: Publish fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "fix: usar fotos estables de Supabase en Otay Campestre"
+          git pull --rebase origin main
+          git push origin HEAD:main
