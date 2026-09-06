@@ -1,0 +1,60 @@
+name: Build cotizador V36.4 offline
+
+on:
+  push:
+    branches: [cotizador-v36-4-offline-fix]
+    paths:
+      - '.github/workflows/build-cotizador-v36-4-offline.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cotizador-v36-4-offline-fix
+
+      - name: Recover current cotizador and apply V36.4 offline fix
+        shell: bash
+        env:
+          SW_B64: "LyogSW52aWVydGUgSW50ZWxpZ2VudGUgwrcgU2VydmljZSBXb3JrZXIgVjM2LjQgwrcgT0ZGTElORSBST1VURSBGSVggKi8KY29uc3QgQ09SRT0naWktY290aXphZG9yLXYzNi40LWNvcmUnOwpjb25zdCBSVU5USU1FPSdpaS1jb3RpemFkb3ItdjM2LjQtcnVudGltZSc7Ci8qIFN0YWJsZSBtYXAgY2FjaGU6IGRvd25sb2FkZWQgcGxhbnMgc3Vydml2ZSBhcHAgdXBkYXRlcy4gKi8KY29uc3QgTUFQUz0naWktY290aXphZG9yLXYzNi1tYXBzJzsKCmNvbnN0IENPUkVfRklMRVM9WwogICcuLycsJy4vaW5kZXguaHRtbCcsJy4vY290aXphZG9yLmh0bWwnLCcuL2NsaWVudGVzLmh0bWwnLCcuL2FkbWluLmh0bWwnLCcuL2NybS5odG1sJywnLi9wZXJmaWwuaHRtbCcsJy4vY290aXphZG9yX2FkbWluX3YyMi5odG1sJywKICAnLi9vZmZsaW5lLWNvcmUuanMnLCcuL21hcC1tYW5pZmVzdC5qc29uJywKICAnLi9hc3NldHMvbWFwYXMvbG9tYXMtZGVsLXByYWRvLnN2ZycsJy4vYXNzZXRzL21hcGFzL3BhcmFtby5zdmcnLAogICcuL2Fzc2V0cy9kYXRhL3ZpdmUtbGEtYmFqYS1kZXNhcnJvbGxvcy5qc29uJywnLi9hc3NldHMvZGF0YS92aXZlLXBhcmFtby1pbnZlbnRvcnktc25hcHNob3QuanNvbicsCiAgJy4vYXNzZXRzL2dlby9iYWphLWNhbGlmb3JuaWEtbXVuaWNpcGlvcy5nZW9qc29uJwpdOwoKY29uc3QgU0hFTExfQllfUEFUSD1uZXcgTWFwKFsKICBbJy8nLCcuL2luZGV4Lmh0bWwnXSwKICBbJy9pbmRleC5odG1sJywnLi9pbmRleC5odG1sJ10sCiAgWycvY290aXphZG9yLmh0bWwnLCcuL2NvdGl6YWRvci5odG1sJ10sCiAgWycvY2xpZW50ZXMuaHRtbCcsJy4vY2xpZW50ZXMuaHRtbCddLAogIFsnL2FkbWluLmh0bWwnLCcuL2FkbWluLmh0bWwnXSwKICBbJy9jcm0uaHRtbCcsJy4vY3JtLmh0bWwnXSwKICBbJy9wZXJmaWwuaHRtbCcsJy4vcGVyZmlsLmh0bWwnXSwKICBbJy9jb3RpemFkb3JfYWRtaW5fdjIyLmh0bWwnLCcuL2NvdGl6YWRvcl9hZG1pbl92MjIuaHRtbCddCl0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJyxldmVudD0+ewogIGV2ZW50LndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENPUkUpCiAgICAgIC50aGVuKGNhY2hlPT5jYWNoZS5hZGRBbGwoQ09SRV9GSUxFUykpCiAgICAgIC50aGVuKCgpPT5zZWxmLnNraXBXYWl0aW5nKCkpCiAgKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2FjdGl2YXRlJyxldmVudD0+ewogIGV2ZW50LndhaXRVbnRpbCgoYXN5bmMoKT0+ewogICAgY29uc3Qga2V5cz1hd2FpdCBjYWNoZXMua2V5cygpOwogICAgYXdhaXQgUHJvbWlzZS5hbGwoa2V5cy5tYXAoa2V5PT57CiAgICAgIGlmKGtleT09PUNPUkUgfHwga2V5PT09UlVOVElNRSB8fCBrZXk9PT1NQVBTKSByZXR1cm4gUHJvbWlzZS5yZXNvbHZlKGZhbHNlKTsKICAgICAgLyogUmVtb3ZlIG9sZCBjb3RpemFkb3IgYXBwLXNoZWxsL3J1bnRpbWUgY2FjaGVzLCBidXQgbmV2ZXIgZGVsZXRlIHRoZSBwZXJzaXN0ZW50IG1hcCBjYWNoZS4gKi8KICAgICAgaWYoa2V5LnN0YXJ0c1dpdGgoJ2lpLWNvdGl6YWRvci12JykpIHJldHVybiBjYWNoZXMuZGVsZXRlKGtleSk7CiAgICAgIHJldHVybiBQcm9taXNlLnJlc29sdmUoZmFsc2UpOwogICAgfSkpOwogICAgYXdhaXQgc2VsZi5jbGllbnRzLmNsYWltKCk7CiAgfSkoKSk7Cn0pOwoKZnVuY3Rpb24gc2FtZU9yaWdpbkNhbm9uaWNhbFJlcXVlc3QocmVxdWVzdCl7CiAgY29uc3QgdXJsPW5ldyBVUkwocmVxdWVzdC51cmwpOwogIGlmKHVybC5vcmlnaW4hPT1zZWxmLmxvY2F0aW9uLm9yaWdpbikgcmV0dXJuIHJlcXVlc3Q7CiAgLyogUXVlcnkgcGFyYW1ldGVycyBzdWNoIGFzID92PS4uLiBvciA/cmVmPS4uLiBtdXN0IG5vdCBjcmVhdGUgYSBkaWZmZXJlbnQgb2ZmbGluZSByZXNvdXJjZS4gKi8KICByZXR1cm4gbmV3IFJlcXVlc3QodXJsLm9yaWdpbit1cmwucGF0aG5hbWUsewogICAgbWV0aG9kOidHRVQnLAogICAgaGVhZGVyczpyZXF1ZXN0LmhlYWRlcnMsCiAgICBtb2RlOidzYW1lLW9yaWdpbicsCiAgICBjcmVkZW50aWFsczonc2FtZS1vcmlnaW4nLAogICAgcmVkaXJlY3Q6J2ZvbGxvdycKICB9KTsKfQoKYXN5bmMgZnVuY3Rpb24gY2FjaGVkUm91dGUocGF0aG5hbWUpewogIGNvbnN0IHNoZWxsPVNIRUxMX0JZX1BBVEguZ2V0KHBhdGhuYW1lKTsKICBpZihzaGVsbCl7CiAgICBjb25zdCBoaXQ9YXdhaXQgY2FjaGVzLm1hdGNoKHNoZWxsLHtpZ25vcmVTZWFyY2g6dHJ1ZX0pOwogICAgaWYoaGl0KSByZXR1cm4gaGl0OwogIH0KICByZXR1cm4gbnVsbDsKfQoKYXN5bmMgZnVuY3Rpb24gY2FjaGVSZXNwb25zZShjYWNoZU5hbWUsa2V5LHJlc3BvbnNlKXsKICBpZighcmVzcG9uc2UgfHwgIXJlc3BvbnNlLm9rKSByZXR1cm47CiAgdHJ5ewogICAgY29uc3QgY2FjaGU9YXdhaXQgY2FjaGVzLm9wZW4oY2FjaGVOYW1lKTsKICAgIGF3YWl0IGNhY2hlLnB1dChrZXkscmVzcG9uc2UuY2xvbmUoKSk7CiAgfWNhdGNoKGVycil7CiAgICAvKiBTdG9yYWdlIHF1b3RhL25ldHdvcmsgcmFjZXMgbXVzdCBuZXZlciBicmVhayB0aGUgbGl2ZSByZXF1ZXN0LiAqLwogIH0KfQoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsZXZlbnQ9PnsKICBjb25zdCByZXF1ZXN0PWV2ZW50LnJlcXVlc3Q7CiAgaWYocmVxdWVzdC5tZXRob2QhPT0nR0VUJykgcmV0dXJuOwoKICBjb25zdCB1cmw9bmV3IFVSTChyZXF1ZXN0LnVybCk7CiAgY29uc3QgaXNNYXA9CiAgICB1cmwucGF0aG5hbWUuaW5jbHVkZXMoJy9hc3NldHMvbWFwYXMvJykgfHwKICAgIHVybC5wYXRobmFtZS5lbmRzV2l0aCgnL21hcC1tYW5pZmVzdC5qc29uJykgfHwKICAgIHVybC5wYXRobmFtZS5pbmNsdWRlcygnL2Fzc2V0cy9nZW8vJykgfHwKICAgIHVybC5wYXRobmFtZS5pbmNsdWRlcygnL2Fzc2V0cy9kYXRhLycpIHx8CiAgICAodXJsLmhvc3RuYW1lPT09J2Npc2lhbmN1cGhka3lia2Rkd21xLnN1cGFiYXNlLmNvJyAmJiB1cmwucGF0aG5hbWUuaW5jbHVkZXMoJy9mdW5jdGlvbnMvdjEvdml2ZS1wbGFuby1wdWJsaWNvJykpOwoKICBpZihpc01hcCl7CiAgICBldmVudC5yZXNwb25kV2l0aCgoYXN5bmMoKT0+ewogICAgICBjb25zdCBoaXQ9YXdhaXQgY2FjaGVzLm1hdGNoKHJlcXVlc3Qse2lnbm9yZVNlYXJjaDp0cnVlfSk7CiAgICAgIGlmKGhpdCkgcmV0dXJuIGhpdDsKICAgICAgdHJ5ewogICAgICAgIGNvbnN0IHJlc3BvbnNlPWF3YWl0IGZldGNoKHJlcXVlc3QpOwogICAgICAgIGlmKHJlc3BvbnNlICYmIHJlc3BvbnNlLm9rKSBhd2FpdCBjYWNoZVJlc3BvbnNlKE1BUFMscmVxdWVzdCxyZXNwb25zZSk7CiAgICAgICAgcmV0dXJuIHJlc3BvbnNlOwogICAgICB9Y2F0Y2goZXJyKXsKICAgICAgICAvKiBDcm9zcy1vcmlnaW4gcGxhbnMgY2FuIGFkZGl0aW9uYWxseSBleGlzdCBpbiBJbmRleGVkREIgdGhyb3VnaCBvZmZsaW5lLWNvcmUuanMuICovCiAgICAgICAgdGhyb3cgZXJyOwogICAgICB9CiAgICB9KSgpKTsKICAgIHJldHVybjsKICB9CgogIGlmKHJlcXVlc3QubW9kZT09PSduYXZpZ2F0ZScpewogICAgZXZlbnQucmVzcG9uZFdpdGgoKGFzeW5jKCk9PnsKICAgICAgY29uc3QgY2Fub25pY2FsPXNhbWVPcmlnaW5DYW5vbmljYWxSZXF1ZXN0KHJlcXVlc3QpOwogICAgICB0cnl7CiAgICAgICAgY29uc3QgcmVzcG9uc2U9YXdhaXQgZmV0Y2gocmVxdWVzdCk7CiAgICAgICAgaWYocmVzcG9uc2UgJiYgcmVzcG9uc2Uub2spewogICAgICAgICAgLyogU3RvcmUgYnkgcGF0aCBvbmx5LiA/diwgP3JlZiBhbmQgY2FjaGUtYnVzdGVycyBhcmUgZGVsaWJlcmF0ZWx5IGlnbm9yZWQgb2ZmbGluZS4gKi8KICAgICAgICAgIGF3YWl0IGNhY2hlUmVzcG9uc2UoUlVOVElNRSxjYW5vbmljYWwscmVzcG9uc2UpOwogICAgICAgIH0KICAgICAgICByZXR1cm4gcmVzcG9uc2U7CiAgICAgIH1jYXRjaChlcnIpewogICAgICAgIC8qIElNUE9SVEFOVDogcmV0dXJuIHRoZSBwYWdlIHRoYXQgd2FzIGFjdHVhbGx5IHJlcXVlc3RlZC4gY2xpZW50ZXMuaHRtbCBuZXZlciBiZWNvbWVzIGluZGV4Lmh0bWwvY290aXphZG9yLmh0bWwuICovCiAgICAgICAgY29uc3Qgcm91dGVIaXQ9YXdhaXQgY2FjaGVkUm91dGUodXJsLnBhdGhuYW1lKTsKICAgICAgICBpZihyb3V0ZUhpdCkgcmV0dXJuIHJvdXRlSGl0OwoKICAgICAgICBjb25zdCBleGFjdD1hd2FpdCBjYWNoZXMubWF0Y2goY2Fub25pY2FsLHtpZ25vcmVTZWFyY2g6dHJ1ZX0pOwogICAgICAgIGlmKGV4YWN0KSByZXR1cm4gZXhhY3Q7CgogICAgICAgIC8qIFVua25vd24gbmF2aWdhdGlvbiBnZXRzIHRoZSBsYW5kaW5nIHBhZ2Ugb25seSBhcyBhIGxhc3QgcmVzb3J0LiAqLwogICAgICAgIGNvbnN0IGxhbmRpbmc9YXdhaXQgY2FjaGVzLm1hdGNoKCcuL2luZGV4Lmh0bWwnLHtpZ25vcmVTZWFyY2g6dHJ1ZX0pOwogICAgICAgIGlmKGxhbmRpbmcpIHJldHVybiBsYW5kaW5nOwogICAgICAgIHRocm93IGVycjsKICAgICAgfQogICAgfSkoKSk7CiAgICByZXR1cm47CiAgfQoKICBldmVudC5yZXNwb25kV2l0aCgoYXN5bmMoKT0+ewogICAgY29uc3QgY2Fub25pY2FsPXNhbWVPcmlnaW5DYW5vbmljYWxSZXF1ZXN0KHJlcXVlc3QpOwogICAgY29uc3QgaGl0PWF3YWl0IGNhY2hlcy5tYXRjaChjYW5vbmljYWwse2lnbm9yZVNlYXJjaDp0cnVlfSk7CiAgICBpZihoaXQpIHJldHVybiBoaXQ7CiAgICB0cnl7CiAgICAgIGNvbnN0IHJlc3BvbnNlPWF3YWl0IGZldGNoKHJlcXVlc3QpOwogICAgICBpZihyZXNwb25zZSAmJiByZXNwb25zZS5vaykgYXdhaXQgY2FjaGVSZXNwb25zZShSVU5USU1FLGNhbm9uaWNhbCxyZXNwb25zZSk7CiAgICAgIHJldHVybiByZXNwb25zZTsKICAgIH1jYXRjaChlcnIpewogICAgICBjb25zdCBmYWxsYmFjaz1hd2FpdCBjYWNoZXMubWF0Y2gocmVxdWVzdCx7aWdub3JlU2VhcmNoOnRydWV9KTsKICAgICAgaWYoZmFsbGJhY2spIHJldHVybiBmYWxsYmFjazsKICAgICAgdGhyb3cgZXJyOwogICAgfQogIH0pKCkpOwp9KTsK"
+        run: |
+          set -euo pipefail
+          base='https://invierte-inteligente.pages.dev'
+          files=(index.html cotizador.html clientes.html admin.html crm.html perfil.html cotizador_admin_v22.html offline-core.js map-manifest.json assets/mapas/lomas-del-prado.svg assets/mapas/paramo.svg assets/data/vive-la-baja-desarrollos.json assets/data/vive-paramo-inventory-snapshot.json assets/geo/baja-california-municipios.geojson)
+          for f in "${files[@]}"; do
+            mkdir -p "$(dirname "$f")"
+            curl -fsSL --retry 4 --retry-delay 2 "$base/$f?source=v36_4_repair" -o "$f"
+            test -s "$f"
+          done
+          test "$(wc -c < index.html)" -gt 300000
+          grep -q 'offline-core.js' index.html
+          printf '%s' "$SW_B64" | base64 -d > sw.js
+          python - <<'PY'
+          from pathlib import Path
+          for fn in ['index.html','cotizador.html','clientes.html','admin.html','crm.html','perfil.html','cotizador_admin_v22.html','offline-core.js']:
+              p=Path(fn)
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('36.3','36.4')
+              p.write_text(s,encoding='utf-8')
+          Path('VERSION.txt').write_text('Cotizador Offline V36.4\n',encoding='utf-8')
+          Path('V36_4_OFFLINE_FIX.txt').write_text('V36.4 OFFLINE ROUTE FIX\n- Corrige navegación offline por ruta: clientes.html, cotizador.html, admin.html, crm.html y perfil.html conservan su propia pantalla.\n- Los parámetros ?v=, ?ref= y otros query strings ya no crean una copia distinta para el modo offline.\n- Evita que clientes.html termine mostrando index.html/cotizador.html cuando no hay conexión.\n- Renueva caché de app shell a ii-cotizador-v36.4-* y conserva permanentemente ii-cotizador-v36-maps.\n- Mantiene la estrategia online-first para navegación y copia local para caídas de red.\n',encoding='utf-8')
+          PY
+          grep -q "sw.js?v=36.4" index.html
+          grep -q "ii-cotizador-v36.4-runtime" index.html
+          grep -q "const CORE='ii-cotizador-v36.4-core'" sw.js
+          grep -q "'/clientes.html','./clientes.html'" sw.js
+
+      - name: Commit isolated cotizador build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html cotizador.html clientes.html admin.html crm.html perfil.html cotizador_admin_v22.html offline-core.js sw.js VERSION.txt V36_4_OFFLINE_FIX.txt map-manifest.json assets/mapas/lomas-del-prado.svg assets/mapas/paramo.svg assets/data/vive-la-baja-desarrollos.json assets/data/vive-paramo-inventory-snapshot.json assets/geo/baja-california-municipios.geojson
+          git commit -m 'fix: cotizador V36.4 offline por ruta [skip ci]'
+          git push origin HEAD:cotizador-v36-4-offline-fix
