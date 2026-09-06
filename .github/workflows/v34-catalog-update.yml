@@ -1,0 +1,134 @@
+name: V34 Catalog Vive La Baja
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/v34-catalog-update.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Add current Vive La Baja developments and Tecate filter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re, subprocess, tempfile
+
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          if 'const CATALOG = [' not in s:
+              raise SystemExit('No se encontró const CATALOG')
+
+          objects = [
+          '''  {
+            id:"costa-blanca", name:"Costa Blanca", members:["Costa Blanca"], priceNames:["Costa Blanca"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-CostaBlanca.jpg", type:"costa",
+            description:"Desarrollo de costa de Vive La Baja en Playas de Rosarito. Consulta inventario, superficies, ubicación y condiciones vigentes antes de cotizar.",
+            amenities:["Áreas Verdes"]
+          }''',
+          '''  {
+            id:"costa-dorada", name:"Costa Dorada", members:["Costa Dorada"], priceNames:["Costa Dorada"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-CostaDorada.jpg", type:"costa",
+            description:"Desarrollo de costa de Vive La Baja en Playas de Rosarito. La disponibilidad y las condiciones se muestran con la información vigente registrada en el catálogo.",
+            amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+          }''',
+          '''  {
+            id:"encino-solo", name:"Encino Solo", members:["Encino Solo"], priceNames:["Encino Solo"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-EncinoSolo.jpg", type:"campestre",
+            description:"Desarrollo campestre de Vive La Baja en Ensenada. Consulta lotes, superficies y condiciones vigentes directamente desde el inventario disponible.",
+            amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+          }''',
+          '''  {
+            id:"mision-guadalupe", name:"Misión Guadalupe", members:["Misión Guadalupe","Mision Guadalupe"], priceNames:["Misión Guadalupe","Mision Guadalupe"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-MisionGpe.jpg", type:"campestre",
+            description:"Desarrollo campestre de Vive La Baja en Ensenada. Consulta disponibilidad, superficie y opciones vigentes antes de solicitar una cotización.",
+            amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+          }''',
+          '''  {
+            id:"taray-residencial", name:"Taray Residencial", members:["Taray Residencial","Taray"], priceNames:["Taray Residencial"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Taray.jpg", type:"campestre",
+            description:"Desarrollo campestre de Vive La Baja en Ensenada. La disponibilidad se confirma con el inventario vigente del catálogo.",
+            amenities:["Alumbrado Público","Electrificación"]
+          }''',
+          '''  {
+            id:"alto-cielo", name:"Alto Cielo", members:["Alto Cielo","Altocielo","AltoCielo"], priceNames:["Altocielo","Alto Cielo","AltoCielo"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-AltoCielo.jpg", type:"campestre",
+            description:"Desarrollo campestre de Vive La Baja en Tecate. Consulta inventario, superficies, ubicación y condiciones vigentes.",
+            amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+          }''',
+          '''  {
+            id:"el-fuerte-ii", name:"El Fuerte II", members:["El Fuerte 2","El Fuerte II"], priceNames:["El Fuerte 2","El Fuerte II"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Fuerte.jpg", type:"urbano",
+            description:"Desarrollo urbano de Vive La Baja en Tijuana. Consulta disponibilidad, medidas y condiciones vigentes antes de cotizar.",
+            amenities:["Alumbrado Público"]
+          }''',
+          '''  {
+            id:"las-puertas-ii", name:"Las Puertas II", members:["La Puerta 2","Las Puertas II","Las Puertas"], priceNames:["Las Puertas II","La Puerta 2"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Puertas.jpg", type:"urbano",
+            description:"Desarrollo urbano de Vive La Baja en Tijuana. Consulta inventario, superficie, ubicación y opciones de financiamiento vigentes.",
+            amenities:["Alumbrado Público","Electrificación"]
+          }'''
+          ]
+
+          ids=['costa-blanca','costa-dorada','encino-solo','mision-guadalupe','taray-residencial','alto-cielo','el-fuerte-ii','las-puertas-ii']
+          missing=[obj for obj,idv in zip(objects,ids) if f'id:"{idv}"' not in s]
+          if missing:
+              start=s.index('const CATALOG = [')
+              end=s.index('\n];',start)
+              s=s[:end]+',\n// CATALOGO_V34_VIVE_CURRENT\n'+',\n'.join(missing)+s[end:]
+
+          ens='<button type="button" class="cs-zone" data-client-zone="ensenada">Ensenada</button>'
+          tec='<button type="button" class="cs-zone" data-client-zone="tecate">Tecate</button>'
+          if 'data-client-zone="tecate"' not in s:
+              if ens not in s:
+                  raise SystemExit('No se encontró botón Ensenada para insertar Tecate')
+              s=s.replace(ens,ens+'\n          '+tec,1)
+
+          old='.cs-zone-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}'
+          new='.cs-zone-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}'
+          if old in s:
+              s=s.replace(old,new,1)
+
+          for idv in ids:
+              if s.count(f'id:"{idv}"') != 1:
+                  raise SystemExit(f'ID faltante o duplicado: {idv}')
+          if s.count('data-client-zone="tecate"') != 1:
+              raise SystemExit('Filtro Tecate faltante o duplicado')
+
+          p.write_text(s,encoding='utf-8')
+
+          scripts=re.findall(r'<script([^>]*)>(.*?)</script>',s,re.S|re.I)
+          checked=0
+          with tempfile.TemporaryDirectory() as td:
+              for i,(attrs,js) in enumerate(scripts):
+                  if 'src=' in attrs.lower() or 'application/ld+json' in attrs.lower():
+                      continue
+                  f=Path(td)/f'inline_{i}.js'
+                  f.write_text(js,encoding='utf-8')
+                  subprocess.run(['node','--check',str(f)],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+                  checked+=1
+          print(f'V34 catalog patch OK; inline scripts validated: {checked}')
+          PY
+
+      - name: Commit V34 catalog update and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm -f .github/workflows/v34-catalog-update.yml
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "feat: agregar desarrollos Vive La Baja al catálogo V34"
+          git pull --rebase origin main
+          git push origin HEAD:main
