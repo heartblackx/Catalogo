@@ -1,0 +1,34 @@
+name: Extract catalog media bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'catalog_media_bundle.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Extract media assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -o catalog_media_bundle.zip
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/desarrollos/urbano/otay-campestre assets/desarrollos/urbano/lomas-del-valle
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "fix: publicar fotos locales de Otay Campestre y Lomas del Valle"
+          git pull --rebase origin main
+          git push origin HEAD:main
