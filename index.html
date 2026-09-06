@@ -801,7 +801,7 @@ img[src*="#campestre-clean"]{object-position:50% 0!important}
 .cs-budget-field{margin:0!important}
 .cs-budget-field input{font-size:1.12rem!important}
 .cs-no-budget{justify-self:start;border:0;background:transparent;color:#0b6572;font-weight:900;font-size:.78rem;padding:2px 0 4px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-.cs-zone-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.cs-zone-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
 .cs-zone{padding:9px 7px;font-size:.74rem}
 .cs-primary{margin-top:2px!important;min-height:58px!important;font-size:1.02rem!important}
 .cs-helper{text-align:center;color:#7d898e;font-size:.68rem;line-height:1.4}
@@ -906,6 +906,7 @@ img[src*="#campestre-clean"]{object-position:50% 0!important}
           <button type="button" class="cs-zone" data-client-zone="tijuana">Tijuana</button>
           <button type="button" class="cs-zone" data-client-zone="rosarito">Rosarito</button>
           <button type="button" class="cs-zone" data-client-zone="ensenada">Ensenada</button>
+          <button type="button" class="cs-zone" data-client-zone="tecate">Tecate</button>
         </div>
       </div>
 
@@ -1176,7 +1177,48 @@ const CATALOG = [
     id:"otay-campestre", name:"Otay Campestre", members:["Otay Campestre"], priceNames:["Otay Campestre"], siteImage:"https://lh3.googleusercontent.com/sitesv/AG8ngQWvqsNIN-SVojeicnKQNYjkYEZbkXdSmYUVyzD_DQgQ9Ya4r020bRgjlxsT9jEE_96BtvdQJmCNOGOJ19WcykIdMOQUogFhDafyKWTB4GhCgzKHLa8VnnuRzcAWrZEln94FACywyLaVkJB5RQOENdOyA_uPOHMtRlF6Q0t9BktpYGdLBxBVQgAfxtc5=w16383", type:"campestre",
     description:"Un desarrollo pensado para quienes buscan más espacio, tranquilidad y contacto con la naturaleza. Una alternativa atractiva para construir una casa de campo, disfrutar en familia o invertir.",
     amenities:["Casa Club","Alberca","Asadores","Zona escolar","Lago natural","Sport Bar","Zona infantil","Pórtico de acceso"]
-  }
+  },
+// CATALOGO_V34_VIVE_CURRENT
+  {
+  id:"costa-blanca", name:"Costa Blanca", members:["Costa Blanca"], priceNames:["Costa Blanca"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-CostaBlanca.jpg", type:"costa",
+  description:"Desarrollo de costa de Vive La Baja en Playas de Rosarito. Consulta inventario, superficies, ubicación y condiciones vigentes antes de cotizar.",
+  amenities:["Áreas Verdes"]
+},
+  {
+  id:"costa-dorada", name:"Costa Dorada", members:["Costa Dorada"], priceNames:["Costa Dorada"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-CostaDorada.jpg", type:"costa",
+  description:"Desarrollo de costa de Vive La Baja en Playas de Rosarito. La disponibilidad y las condiciones se muestran con la información vigente registrada en el catálogo.",
+  amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+},
+  {
+  id:"encino-solo", name:"Encino Solo", members:["Encino Solo"], priceNames:["Encino Solo"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-EncinoSolo.jpg", type:"campestre",
+  description:"Desarrollo campestre de Vive La Baja en Ensenada. Consulta lotes, superficies y condiciones vigentes directamente desde el inventario disponible.",
+  amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+},
+  {
+  id:"mision-guadalupe", name:"Misión Guadalupe", members:["Misión Guadalupe","Mision Guadalupe"], priceNames:["Misión Guadalupe","Mision Guadalupe"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-MisionGpe.jpg", type:"campestre",
+  description:"Desarrollo campestre de Vive La Baja en Ensenada. Consulta disponibilidad, superficie y opciones vigentes antes de solicitar una cotización.",
+  amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+},
+  {
+  id:"taray-residencial", name:"Taray Residencial", members:["Taray Residencial","Taray"], priceNames:["Taray Residencial"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Taray.jpg", type:"campestre",
+  description:"Desarrollo campestre de Vive La Baja en Ensenada. La disponibilidad se confirma con el inventario vigente del catálogo.",
+  amenities:["Alumbrado Público","Electrificación"]
+},
+  {
+  id:"alto-cielo", name:"Alto Cielo", members:["Alto Cielo","Altocielo","AltoCielo"], priceNames:["Altocielo","Alto Cielo","AltoCielo"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-AltoCielo.jpg", type:"campestre",
+  description:"Desarrollo campestre de Vive La Baja en Tecate. Consulta inventario, superficies, ubicación y condiciones vigentes.",
+  amenities:["Áreas Verdes","Alumbrado Público","Electrificación"]
+},
+  {
+  id:"el-fuerte-ii", name:"El Fuerte II", members:["El Fuerte 2","El Fuerte II"], priceNames:["El Fuerte 2","El Fuerte II"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Fuerte.jpg", type:"urbano",
+  description:"Desarrollo urbano de Vive La Baja en Tijuana. Consulta disponibilidad, medidas y condiciones vigentes antes de cotizar.",
+  amenities:["Alumbrado Público"]
+},
+  {
+  id:"las-puertas-ii", name:"Las Puertas II", members:["La Puerta 2","Las Puertas II","Las Puertas"], priceNames:["Las Puertas II","La Puerta 2"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Puertas.jpg", type:"urbano",
+  description:"Desarrollo urbano de Vive La Baja en Tijuana. Consulta inventario, superficie, ubicación y opciones de financiamiento vigentes.",
+  amenities:["Alumbrado Público","Electrificación"]
+}
 ];
 
 
