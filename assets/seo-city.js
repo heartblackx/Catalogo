@@ -26,7 +26,7 @@
 
       grid.innerHTML = rows.map((d) => {
         const range = d.min_m2 == null ? 'Superficie por consultar' : (Math.abs(Number(d.max_m2) - Number(d.min_m2)) < 0.01 ? `${fmt(d.min_m2)} m²` : `${fmt(d.min_m2)}–${fmt(d.max_m2)} m²`);
-        const quoteUrl = `https://terrenos.invierteinteligentetj.com/?ciudad=${encodeURIComponent(cfg.city)}&desarrollo=${encodeURIComponent(d.name)}#desarrollos`;
+        const quoteUrl = `../?ciudad=${encodeURIComponent(cfg.city)}&desarrollo=${encodeURIComponent(d.name)}#desarrollos`;
         const mapLink = d.maps_url ? `<a class="map-link" target="_blank" rel="noopener" href="${esc(d.maps_url)}">Ver ubicación ↗</a>` : '';
         return `<article class="dev-card">
           <div class="dev-top"><span>Desarrollo</span><strong>${esc(d.name)}</strong></div>
@@ -41,7 +41,7 @@
     } catch (err) {
       console.error(err);
       status.textContent = 'No fue posible consultar la disponibilidad en este momento.';
-      grid.innerHTML = '<div class="empty">Puedes abrir el catálogo general para consultar la disponibilidad actualizada.<br><a class="fallback" href="https://terrenos.invierteinteligentetj.com/">Abrir catálogo →</a></div>';
+      grid.innerHTML = '<div class="empty">Puedes abrir el catálogo general para consultar la disponibilidad actualizada.<br><a class="fallback" href="../">Abrir catálogo →</a></div>';
     }
   }
 
