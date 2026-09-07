@@ -1469,7 +1469,7 @@ function renderQuoteModal(preserve=false){
       <form class="appointment-box" id="appointmentForm">
         <h3>Agenda una visita al terreno</h3>
         <p>Conoce el terreno sin compromiso, revisa su ubicación y recibe información adicional directamente con un asesor. Completa estos 4 datos para solicitar tu visita.</p>
-        <div class="appointment-visit-note"><strong>Visita sin compromiso</strong><span>Agendar y conocer el terreno no te obliga a comprar ni a realizar ningún pago.</span></div>
+        <div class="appointment-visit-note"><strong>Visita sin compromiso</strong><span>Conoce el terreno y resuelve tus dudas sin compromiso. Si necesitas cambiar el día u horario, avísanos con anticipación para ayudarnos a respetar el horario de todos.</span></div>
         <div class="appointment-grid">
           <div class="appointment-field"><label for="citaNombre">Nombre</label><input id="citaNombre" name="nombre" autocomplete="name" maxlength="80" placeholder="Tu nombre completo" required></div>
           <div class="appointment-field"><label for="citaTelefono">Teléfono</label><input id="citaTelefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" maxlength="18" placeholder="664 000 0000" required></div>
@@ -1575,15 +1575,14 @@ async function submitAppointment(e){
           <div><small>Folio</small><strong>${esc(String(data.cita_id||"").slice(0,8).toUpperCase()||"Registrado")}</strong></div>
         </div>
         <div class="appointment-trust">
-          <div class="appointment-trust-head"><span>🛡️</span><div><small>Tu seguridad es primero</small><strong>Compra y aparta con un proceso claro</strong></div></div>
-          <p><b>Todos los acuerdos, contratos y trámites se formalizan en oficinas de Vive La Baja.</b> La visita al terreno es informativa y no te obliga a entregar dinero.</p>
-          <div class="appointment-trust-list">
-            <div><b>1</b><span>Si decides apartar o dar enganche durante la visita, hazlo <strong>únicamente por transferencia</strong> dentro del proceso que tu asesor te confirme.</span></div>
-            <div><b>2</b><span>Antes de transferir, confirma con tu asesor el <strong>concepto, monto y cuenta receptora</strong>. No entregues efectivo en campo.</span></div>
-            <div><b>3</b><span>Conserva tu comprobante y solicita tu <strong>recibo de pago el mismo día</strong> o, como máximo, dentro de las siguientes 48 horas.</span></div>
-            <div><b>4</b><span>Si este desarrollo permite un <strong>apartado desde $200 USD</strong>, tu asesor te lo indicará antes de cualquier transferencia y te explicará los pasos a seguir.</span></div>
-          </div>
-          <p class="appointment-trust-foot">Ante cualquier duda, consulta a tu asesor antes de pagar. Tu asesor debe explicarte el proceso, los documentos y dónde se formaliza cada trámite.</p>
+          <div class="appointment-trust-head"><span>✓</span><div><small>Proceso claro</small><strong>Atención y trámites formales</strong></div></div>
+          <p>La formalización del trámite se realiza en oficinas de <b>Vive La Baja</b>. Durante la visita puedes conocer el terreno y resolver tus dudas sin compromiso.</p>
+          <p>Si decides apartar o dar enganche, tu asesor te indicará el proceso y la transferencia correspondiente. Conserva tu comprobante y solicita tu recibo de pago el mismo día o, como máximo, dentro de las siguientes 48 horas.</p>
+          <p>En desarrollos participantes, el apartado puede iniciar desde <b>$200 USD</b>. Confirma disponibilidad y condiciones con tu asesor antes de realizar la transferencia.</p>
+        </div>
+        <div class="appointment-courtesy">
+          <strong>¿Necesitas cambiar tu visita?</strong>
+          <span>Avísanos con anticipación si no puedes asistir o necesitas otro día u horario. Así podemos liberar ese espacio para otra persona y ayudarte a que las visitas se atiendan lo más puntual posible.</span>
         </div>
         <button class="success-close" onclick="closeQuoteModal()">Cerrar</button>
       </div>`;
@@ -3138,6 +3137,22 @@ load();
   }
 </style>
 <!-- /CATALOGO_V40_APPOINTMENT_TRUST -->
+
+
+
+<!-- CATALOGO_V41_APPOINTMENT_COURTESY -->
+<style id="catalogo-v41-appointment-courtesy-style">
+  .appointment-courtesy{
+    margin-top:12px;padding:14px 15px;border-radius:16px;background:#fff;border:1px solid rgba(11,89,104,.11);
+    color:#50656c;text-align:left
+  }
+  .appointment-courtesy strong{display:block;margin-bottom:4px;color:#173b46;font-size:.86rem}
+  .appointment-courtesy span{display:block;font-size:.78rem;line-height:1.5}
+  .appointment-trust{padding:16px}
+  .appointment-trust>p{margin:0 0 9px}
+  .appointment-trust>p:last-child{margin-bottom:0}
+</style>
+<!-- /CATALOGO_V41_APPOINTMENT_COURTESY -->
 
 </body>
 </html>
