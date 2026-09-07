@@ -1,0 +1,127 @@
+from pathlib import Path
+import re
+
+path = Path('index.html')
+s = path.read_text(encoding='utf-8')
+
+# Alamar 2 y 3 son inventarios distintos: no mezclar precios entre fases.
+s = s.replace(
+    'id:"alamar", name:"Alamar Residencial", members:["Alamar"], priceNames:["Alamar 1"], siteImage:',
+    'id:"alamar-2", name:"Alamar 2", members:["Alamar 2"], priceNames:["Alamar 2"], siteImage:'
+)
+m = re.search(r'\{\s*id:"alamar-2".*?\n\s*\},', s, re.S)
+if m:
+    old = m.group(0)
+    new = re.sub(
+        r'siteImage:"[^"]*"',
+        'siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Alamar.jpg"',
+        old,
+        count=1,
+    )
+    s = s.replace(old, new, 1)
+
+# La fuente comercial El Fuerte II corresponde al inventario activo "El Fuerte".
+s = s.replace(
+    'members:["El Fuerte 2","El Fuerte II"], priceNames:["El Fuerte 2","El Fuerte II"]',
+    'members:["El Fuerte","El Fuerte 2","El Fuerte II"], priceNames:["El Fuerte","El Fuerte 2","El Fuerte II"]',
+)
+
+marker = '// CATALOGO_V35_INVENTARIO_ACTIVO'
+if marker not in s:
+    block = '''
+,
+// CATALOGO_V35_INVENTARIO_ACTIVO
+  {
+    id:"alamar-3", name:"Alamar 3", members:["Alamar 3"], priceNames:["Alamar 3"], siteImage:"https://vivelabaja.com/images/Desarrollos/760x500-Alamar.jpg", type:"urbano",
+    description:"Desarrollo urbano de Vive en la Baja en Tijuana con inventario vigente. Consulta lotes, superficies, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"bella-vista", name:"Bella Vista", members:["Bella Vista"], priceNames:["Bella Vista"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"colinas-santa-fe", name:"Colinas de Santa Fe", members:["Colinas de Santa Fe"], priceNames:["Colinas de Santa Fe"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"colinas-santa-fe-2", name:"Colinas de Santa Fe 2", members:["Colinas de Santa Fe 2"], priceNames:["Colinas de Santa Fe 2"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"las-puertas-i", name:"Las Puertas I", members:["La Puerta 1","La Puerta I"], priceNames:["La Puerta 1","La Puerta I"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"lomas-del-prado", name:"Lomas del Prado", members:["Lomas del Prado"], priceNames:["Lomas del Prado"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano de Vive en la Baja en Tijuana. Consulta inventario, superficies, ubicación y condiciones vigentes antes de cotizar.", amenities:[]
+  },
+  {
+    id:"paseo-brisas", name:"Paseo de las Brisas", members:["Paseo de las Brisas","Paseo las Brisas"], priceNames:["Paseo de las Brisas","Paseo las Brisas"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"ranchettes", name:"Ranchettes", members:["Ranchettes","Ranchetes"], priceNames:["Ranchettes","Ranchetes"], siteImage:"", type:"costa",
+    description:"Desarrollo con inventario vigente en Playas de Rosarito. Consulta lotes, superficies, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"rancho-bethel", name:"Rancho Bethel", members:["Rancho Bethel"], priceNames:["Rancho Bethel"], siteImage:"", type:"campestre",
+    description:"Desarrollo campestre en Tecate con inventario vigente. Consulta lotes, superficies, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"real-santa-fe", name:"Real de Santa Fe", members:["Real de Santa Fe"], priceNames:["Real de Santa Fe"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"valles-sol", name:"Valles del Sol", members:["Valles del Sol"], priceNames:["Valles del Sol"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"villa-paraiso", name:"Villa Paraiso", members:["Villa Paraiso","Villa Paraíso"], priceNames:["Villa Paraiso","Villa Paraíso"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  },
+  {
+    id:"villas-eden", name:"Villas del Eden", members:["Villas del Eden","Villas del Edén"], priceNames:["Villas del Eden","Villas del Edén"], siteImage:"", type:"urbano",
+    description:"Desarrollo urbano en Tijuana con inventario vigente. Consulta disponibilidad, superficie, ubicación y condiciones registradas antes de cotizar.", amenities:[]
+  }
+'''
+    needle = '\n];\n\n\nconst APPOINTMENT_ENDPOINT'
+    if needle not in s:
+        raise SystemExit('No se encontró el cierre de CATALOG')
+    s = s.replace(needle, block + '\n];\n\n\nconst APPOINTMENT_ENDPOINT', 1)
+
+# Si no existe galería sincronizada, usar siteImage como respaldo en la tarjeta.
+old_media = 'const media=localMedia.length ? localMedia : syncedMedia;'
+new_media = (
+    'const siteMedia=c.siteImage?[{public_url:c.siteImage,portada:true,orden:99,site:true}]:[];\n'
+    '    const media=localMedia.length ? localMedia : (syncedMedia.length ? syncedMedia : siteMedia);'
+)
+if old_media in s:
+    s = s.replace(old_media, new_media, 1)
+
+# Cualquier latitud/longitud válida habilita Maps aunque maps_url esté vacío.
+if 'function mapUrlForModel(m)' not in s:
+    anchor = 'function openMap(id){\n'
+    helper = '''function mapUrlForModel(m){
+  if(m?.loc?.maps_url) return m.loc.maps_url;
+  const lat=Number(m?.loc?.latitud), lng=Number(m?.loc?.longitud);
+  if(Number.isFinite(lat) && Number.isFinite(lng)) return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  return "";
+}
+
+'''
+    if anchor not in s:
+        raise SystemExit('No se encontró openMap')
+    s = s.replace(anchor, helper + anchor, 1)
+
+s = s.replace('const mapDisabled=!m.loc?.maps_url;', 'const mapDisabled=!mapUrlForModel(m);')
+s = s.replace(
+    'if(m?.loc?.maps_url) window.open(m.loc.maps_url,"_blank","noopener");',
+    'const url=mapUrlForModel(m);\n  if(url) window.open(url,"_blank","noopener");',
+)
+s = s.replace(
+    'm.loc?.maps_url?`<button class="devbtn" style="width:100%;margin-top:10px"',
+    'mapUrlForModel(m)?`<button class="devbtn" style="width:100%;margin-top:10px"',
+)
+
+path.write_text(s, encoding='utf-8')
+print('Catálogo actualizado')
