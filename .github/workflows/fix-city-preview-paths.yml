@@ -15,13 +15,16 @@ jobs:
         with:
           ref: seo-city-pages-preview
           fetch-depth: 0
-      - name: Make shared asset path portable
+      - name: Make city pages portable in preview and production
         run: |
           python - <<'PY'
           from pathlib import Path
-          for slug in ('tijuana','rosarito','ensenada'):
+          for slug, city in (('tijuana','Tijuana'),('rosarito','Rosarito'),('ensenada','Ensenada')):
               p=Path(slug)/'index.html'
-              s=p.read_text(encoding='utf-8').replace('src="/assets/seo-city.js"','src="../assets/seo-city.js"')
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('src="/assets/seo-city.js"','src="../assets/seo-city.js"')
+              s=s.replace('href="https://terrenos.invierteinteligentetj.com/">Catálogo general</a>','href="../">Catálogo general</a>')
+              s=s.replace(f'href="https://terrenos.invierteinteligentetj.com/?ciudad={city}#desarrollos"',f'href="../?ciudad={city}#desarrollos"')
               p.write_text(s,encoding='utf-8')
           PY
       - name: Commit if needed
@@ -30,5 +33,5 @@ jobs:
           git config user.name 'HBX Catalog Bot'
           git config user.email 'actions@users.noreply.github.com'
           git add tijuana/index.html rosarito/index.html ensenada/index.html
-          git commit -m 'fix: usar ruta portable en páginas locales'
+          git commit -m 'fix: mantener navegación local en páginas de ciudad'
           git push origin seo-city-pages-preview
