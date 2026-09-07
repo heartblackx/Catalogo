@@ -1,0 +1,41 @@
+name: Remove public talud V45
+
+on:
+  push:
+    branches: [cielo-galileo-v45]
+    paths:
+      - '.github/scripts/remove_talud_public_v45.py'
+      - '.github/workflows/remove-talud-public-v45.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cielo-galileo-v45
+          fetch-depth: 0
+      - name: Apply V45 patch
+        run: python .github/scripts/remove_talud_public_v45.py
+      - name: Validate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert '<small>Talud</small>' not in s
+          assert '["talud","Talud"]' not in s
+          assert '["flat","Plano"]' not in s
+          assert '["corner","Esquina"]' in s
+          print('Validación V45 correcta')
+          PY
+      - name: Commit patched page
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'web: ocultar plano y talud por dato no confiable V45'
+          git push origin cielo-galileo-v45
