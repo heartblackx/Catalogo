@@ -1467,7 +1467,6 @@ function renderQuoteModal(preserve=false){
         <div class="qitem"><small>Lote</small><strong>${esc(lot.lote||"—")}</strong></div>
         <div class="qitem"><small>Superficie</small><strong>${m2(lot.superficie_m2)}</strong></div>
         <div class="qitem"><small>Esquina</small><strong>${esc(esquina)}</strong></div>
-        <div class="qitem"><small>Talud</small><strong>${esc(talud)}</strong></div>
       </div>
       ${controls}
       ${exchange}
@@ -1959,7 +1958,6 @@ function renderLots(){
           <div class="lot-features">
             <div class="lot-feature"><small>Medida</small><strong>${m2(lot.superficie_m2)}</strong></div>
             <div class="lot-feature"><small>Enganche</small><strong>${esc(pct)}</strong></div>
-            <div class="lot-feature"><small>Talud</small><strong>${esc(talud)}</strong></div>
             <div class="lot-feature"><small>Esquina</small><strong>${esc(esquina)}</strong></div>
           </div>
           <button class="lot-btn" onclick="quoteLot('${model.id}','${esc(lot.id)}')">Cotizar este lote →</button>
@@ -2054,7 +2052,6 @@ function renderBudgetSearch(){
             <div><small>Medida</small><strong>${m2(lot.superficie_m2)}</strong></div>
             <div><small>Enganche %</small><strong>${esc(pct)}</strong></div>
             <div><small>Enganche estimado</small><strong>${est?`$${money(est)} USD`:"Consultar"}</strong></div>
-            <div><small>Talud</small><strong>${esc(talud)}</strong></div>
           </div>
           <button onclick="quoteLot('${model.id}','${esc(lot.id)}')">Cotizar este lote →</button>
         </div>
@@ -2123,8 +2120,8 @@ function renderDevelopmentToolbar(){
       <div class="df-group"><span class="df-label">Plazo</span><div class="df-seg">
         ${[0,120,150].map(v=>`<button type="button" class="df-btn ${Number(f.term)===v?"active":""}" onclick="setDevelopmentFilter('term',${v},true)">${v?`${v}m`:"Todos"}</button>`).join("")}
       </div></div>
-      <div class="df-group"><span class="df-label">Tipo de terreno</span><div class="df-seg">
-        ${[["all","Todos"],["flat","Plano"],["talud","Talud"],["corner","Esquina"]].map(([v,l])=>`<button type="button" class="df-btn ${f.terrain===v?"active":""}" onclick="setDevelopmentFilter('terrain','${v}',true)">${l}</button>`).join("")}
+      <div class="df-group"><span class="df-label">Tipo de lote</span><div class="df-seg">
+        ${[["all","Todos"],["corner","Esquina"]].map(([v,l])=>`<button type="button" class="df-btn ${f.terrain===v?"active":""}" onclick="setDevelopmentFilter('terrain','${v}',true)">${l}</button>`).join("")}
       </div></div>
     </div>
     <div class="df-secondary">
@@ -2142,8 +2139,6 @@ function renderDevelopmentToolbar(){
 }
 function developmentLotMatches(model,lot){
   const f=developmentFilters,area=Number(lot.superficie_m2)||0;
-  if(f.terrain==="flat" && lot.tiene_talud!==false)return false;
-  if(f.terrain==="talud" && lot.tiene_talud!==true)return false;
   if(f.terrain==="corner" && lot.es_esquina!==true)return false;
   if(Number(f.areaMin)>0 && area<Number(f.areaMin))return false;
   if(Number(f.areaMax)>0 && area>Number(f.areaMax))return false;
@@ -2183,7 +2178,6 @@ function renderDevelopmentLots(){
         <div class="mlot-grid">
           <div><small>Superficie</small><b>${m2(l.superficie_m2)}</b></div>
           <div><small>Enganche mín.</small><b>${esc(pct)}</b></div>
-          <div><small>Talud</small><b>${esc(talud)}</b></div>
           <div><small>Esquina</small><b>${esc(esquina)}</b></div>
           <div><small>Estado</small><b>Disponible</b></div>
           <div><small>Precio</small><b>${p.ok?esc(p.label):"Consultar"}</b></div>
