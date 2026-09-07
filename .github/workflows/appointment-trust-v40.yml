@@ -1,0 +1,50 @@
+name: Appointment trust V40
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/appointment-trust-v40.yml'
+      - '.github/scripts/appointment_trust_v40_patch.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply V40 patch
+        run: python .github/scripts/appointment_trust_v40_patch.py
+      - name: Validate changes
+        run: |
+          grep -q 'CATALOGO_V40_APPOINTMENT_TRUST' index.html
+          grep -q 'Agenda una visita al terreno' index.html
+          grep -q 'Visita sin compromiso' index.html
+          grep -q 'apartado desde \$200 USD' index.html
+          ! grep -q 'external.textContent="Plano interactivo ↗"' index.html
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('index.html').read_text(encoding='utf-8')
+          assert 'Agendar visita' in t
+          assert 'Todos los acuerdos, contratos y trámites se formalizan en oficinas de Vive La Baja.' in t
+          assert 'recibo de pago el mismo día' in t
+          assert 'Plano interactivo ↗' not in t
+          print('V40 validation OK')
+          PY
+      - name: Commit patched catalog
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No index changes to commit'
+            exit 0
+          fi
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'feat: mejorar visita y aviso de seguridad'
+          git push
