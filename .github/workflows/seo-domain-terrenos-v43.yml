@@ -1,0 +1,40 @@
+name: SEO domain terrenos V43
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/seo_domain_terrenos_v43_patch.py'
+      - '.github/workflows/seo-domain-terrenos-v43.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch canonical domain
+        run: python .github/scripts/seo_domain_terrenos_v43_patch.py
+      - name: Validate SEO files
+        run: |
+          grep -q 'https://terrenos.invierteinteligentetj.com/' index.html
+          grep -q 'https://terrenos.invierteinteligentetj.com/sitemap.xml' robots.txt
+          grep -q '<loc>https://terrenos.invierteinteligentetj.com/</loc>' sitemap.xml
+          ! grep -q 'https://catalogo.invierteinteligentetj.com' index.html
+          ! grep -q 'https://catalogo.invierteinteligentetj.com' robots.txt
+          ! grep -q 'https://catalogo.invierteinteligentetj.com' sitemap.xml
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo 'No changes required'
+            exit 0
+          fi
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html robots.txt sitemap.xml
+          git commit -m 'seo: usar terrenos.invierteinteligentetj.com como dominio oficial'
+          git push
