@@ -1,0 +1,43 @@
+name: SEO local V42
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-local-v42.yml'
+      - '.github/scripts/seo_local_v42_patch.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply SEO patch
+        run: python .github/scripts/seo_local_v42_patch.py
+      - name: Validate SEO
+        run: |
+          grep -q 'CATALOGO_SEO_LOCAL_V42' index.html
+          grep -q 'Terrenos en Tijuana, Rosarito y Ensenada' index.html
+          grep -q 'name="robots" content="index,follow' index.html
+          test -f robots.txt
+          test -f sitemap.xml
+          grep -q 'catalogo.invierteinteligentetj.com/sitemap.xml' robots.txt
+          grep -q 'catalogo.invierteinteligentetj.com/' sitemap.xml
+      - name: Commit patched catalog
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No index changes to commit'
+            exit 0
+          fi
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'seo: mejorar posicionamiento local del catálogo'
+          git push
