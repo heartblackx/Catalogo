@@ -1,0 +1,50 @@
+name: Appointment courtesy V41
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/appointment-courtesy-v41.yml'
+      - '.github/scripts/appointment_courtesy_v41_patch.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply V41 patch
+        run: python .github/scripts/appointment_courtesy_v41_patch.py
+      - name: Validate V41
+        run: |
+          grep -q 'CATALOGO_V41_APPOINTMENT_COURTESY' index.html
+          grep -q '¿Necesitas cambiar tu visita?' index.html
+          grep -q 'avísanos con anticipación' index.html
+          grep -q 'Atención y trámites formales' index.html
+          grep -q 'apartado puede iniciar desde <b>\$200 USD</b>' index.html
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('index.html').read_text(encoding='utf-8')
+          assert 'Tu seguridad es primero' not in t
+          assert 'No entregues efectivo en campo' not in t
+          assert 'Así podemos liberar ese espacio para otra persona' in t
+          assert 'recibo de pago el mismo día o, como máximo, dentro de las siguientes 48 horas' in t
+          print('V41 validation OK')
+          PY
+      - name: Commit patched catalog
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No index changes to commit'
+            exit 0
+          fi
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'feat: mejorar cortesía y reprogramación de visitas'
+          git push
