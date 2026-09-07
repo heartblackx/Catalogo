@@ -1,0 +1,58 @@
+name: Quote lot plan V38
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/quote-lot-plan-v38.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install quote lot plan UI
+        run: python .github/scripts/quote_lot_plan_v38_patch.py
+      - name: Fix global quote state reference
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('if(!window.selectedQuote)return;\n    const {model,lot}=window.selectedQuote;', 'if(typeof selectedQuote==="undefined"||!selectedQuote)return;\n    const {model,lot}=selectedQuote;')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate V38
+        run: |
+          grep -q 'CATALOGO_V38_QUOTE_LOT_PLAN' index.html
+          grep -q 'Ubicación dentro del desarrollo' index.html
+          grep -q 'LOTE COTIZADO' index.html
+          grep -q 'detalle_fuente&order=desarrollo' index.html
+          grep -q 'premium-location-shell>.premium-map-panel{display:none' index.html
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'<script id="catalogo-v38-quote-lot-plan-script">(.*?)</script>',s,re.S)
+          if not m: raise SystemExit('V38 script not found')
+          Path('/tmp/v38.js').write_text(m.group(1),encoding='utf-8')
+          PY
+          node --check /tmp/v38.js
+      - name: Commit changes
+        run: |
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'Sin cambios pendientes'
+          else
+            git commit -m 'feat: mostrar ubicación del lote dentro de la cotización'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
