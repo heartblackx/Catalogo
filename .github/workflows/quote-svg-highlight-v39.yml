@@ -1,0 +1,50 @@
+name: Quote official lot SVG V39
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/quote-svg-highlight-v39.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install official lot SVG quote view
+        run: python .github/scripts/quote_svg_highlight_v39_patch.py
+      - name: Validate V39
+        run: |
+          grep -q 'CATALOGO_V39_OFFICIAL_LOT_SVG' index.html
+          grep -q 'vive-plano-publico' index.html
+          grep -q 'quote-svg-target' index.html
+          grep -q 'Ver lote resaltado' index.html
+          grep -q 'Terreno localizado en el plano real' index.html
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'<script id="catalogo-v39-official-lot-svg-script">(.*?)</script>',s,re.S)
+          if not m:
+              raise SystemExit('V39 script not found')
+          Path('/tmp/v39.js').write_text(m.group(1),encoding='utf-8')
+          PY
+          node --check /tmp/v39.js
+      - name: Commit changes
+        run: |
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'Sin cambios pendientes'
+          else
+            git commit -m 'feat: resaltar lote exacto en plano oficial'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
