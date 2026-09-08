@@ -1,0 +1,1 @@
+V46 media binaries are applied from uploaded WebP assets. This marker can be removed after verification.
