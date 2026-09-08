@@ -7,6 +7,7 @@
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const fmt = (n) => Number.isFinite(Number(n)) ? Number(n).toLocaleString('es-MX', { maximumFractionDigits: 1 }) : '—';
+  const displayName = (name) => String(name || '').trim().toLowerCase() === 'cielo' ? 'Cielo Galileo' : String(name || '');
 
   async function init() {
     try {
@@ -29,7 +30,7 @@
         const quoteUrl = `../?ciudad=${encodeURIComponent(cfg.city)}&desarrollo=${encodeURIComponent(d.name)}#desarrollos`;
         const mapLink = d.maps_url ? `<a class="map-link" target="_blank" rel="noopener" href="${esc(d.maps_url)}">Ver ubicación ↗</a>` : '';
         return `<article class="dev-card">
-          <div class="dev-top"><span>Desarrollo</span><strong>${esc(d.name)}</strong></div>
+          <div class="dev-top"><span>Desarrollo</span><strong>${esc(displayName(d.name))}</strong></div>
           <div class="dev-stats">
             <div><small>Lotes disponibles</small><b>${Number(d.available_lots || 0).toLocaleString('es-MX')}</b></div>
             <div><small>Superficie</small><b>${range}</b></div>
