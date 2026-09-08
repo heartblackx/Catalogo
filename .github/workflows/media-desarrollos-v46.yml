@@ -19,30 +19,48 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s globstar nullglob
-          decode_b64() {
-            local src="$1"
-            local dst="$2"
-            tr -dc 'A-Za-z0-9+/=' < "$src" | base64 -d > "$dst"
-          }
-          for f in assets/desarrollos/**/*.webp.b64; do
-            decode_b64 "$f" "${f%.b64}"
-          done
-          if [ -f assets/desarrollos/cielo-galileo/hero.b64.txt ]; then
-            decode_b64 assets/desarrollos/cielo-galileo/hero.b64.txt assets/desarrollos/cielo-galileo/hero.webp
-          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, re
+
+          files = list(Path('assets/desarrollos').glob('**/*.webp.b64'))
+          special = Path('assets/desarrollos/cielo-galileo/hero.b64.txt')
+          if special.exists():
+              files.append(special)
+
+          for src in files:
+              raw = src.read_text(encoding='utf-8', errors='ignore')
+              clean = re.sub(r'[^A-Za-z0-9+/]', '', raw)
+              clean += '=' * ((4 - len(clean) % 4) % 4)
+              data = base64.b64decode(clean, validate=False)
+              if src.name == 'hero.b64.txt':
+                  dst = src.with_name('hero.webp')
+              else:
+                  dst = Path(str(src)[:-4])
+              dst.write_bytes(data)
+              print(f'{src} -> {dst} ({len(data)} bytes)')
+          PY
 
       - name: Validar imágenes
         shell: bash
         run: |
           set -euo pipefail
-          test -s assets/desarrollos/cielo-galileo/hero.webp
-          test -s assets/desarrollos/cielo-galileo/galeria-1.webp
-          test -s assets/desarrollos/cielo-galileo/galeria-2.webp
-          test -s assets/desarrollos/lomas-del-prado/hero.webp
-          test -s assets/desarrollos/lomas-del-prado/galeria-1.webp
-          test -s assets/desarrollos/lomas-del-prado/fotograma-video.webp
-          file assets/desarrollos/cielo-galileo/*.webp assets/desarrollos/lomas-del-prado/*.webp | grep -q 'Web/P image'
+          python3 - <<'PY'
+          from pathlib import Path
+          files = [
+            Path('assets/desarrollos/cielo-galileo/hero.webp'),
+            Path('assets/desarrollos/cielo-galileo/galeria-1.webp'),
+            Path('assets/desarrollos/cielo-galileo/galeria-2.webp'),
+            Path('assets/desarrollos/lomas-del-prado/hero.webp'),
+            Path('assets/desarrollos/lomas-del-prado/galeria-1.webp'),
+            Path('assets/desarrollos/lomas-del-prado/fotograma-video.webp'),
+          ]
+          for p in files:
+              data = p.read_bytes()
+              assert len(data) > 1000, f'{p}: archivo demasiado pequeño'
+              assert data[:4] == b'RIFF' and data[8:12] == b'WEBP', f'{p}: no es WebP válido'
+              print(f'OK {p} {len(data)} bytes')
+          PY
 
       - name: Limpiar temporales y publicar
         shell: bash
