@@ -1,0 +1,53 @@
+name: Media desarrollos V46
+
+on:
+  push:
+    paths:
+      - '.github/media-v46.ready'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-media:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Decodificar imágenes WebP
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s globstar nullglob
+          for f in assets/desarrollos/**/*.webp.b64; do
+            base64 -d "$f" > "${f%.b64}"
+          done
+          if [ -f assets/desarrollos/cielo-galileo/hero.b64.txt ]; then
+            base64 -d assets/desarrollos/cielo-galileo/hero.b64.txt > assets/desarrollos/cielo-galileo/hero.webp
+          fi
+
+      - name: Validar imágenes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s assets/desarrollos/cielo-galileo/hero.webp
+          test -s assets/desarrollos/cielo-galileo/galeria-1.webp
+          test -s assets/desarrollos/cielo-galileo/galeria-2.webp
+          test -s assets/desarrollos/lomas-del-prado/hero.webp
+          test -s assets/desarrollos/lomas-del-prado/galeria-1.webp
+          test -s assets/desarrollos/lomas-del-prado/fotograma-video.webp
+          file assets/desarrollos/cielo-galileo/*.webp assets/desarrollos/lomas-del-prado/*.webp | grep -q 'Web/P image'
+
+      - name: Limpiar temporales y publicar
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f assets/desarrollos/**/*.webp.b64
+          rm -f assets/desarrollos/cielo-galileo/hero.b64.txt
+          rm -f .github/media-v46.ready .github/scripts/media_v46_note.txt
+          git config user.name 'HBX Catalog Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'media: publicar Cielo Galileo y Lomas del Prado V46'
+          git push
