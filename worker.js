@@ -99,13 +99,15 @@ export default {
     const response = await env.ASSETS.fetch(request);
 
     const methodOk = request.method === "GET";
+    const pageUrl = new URL(request.url);
+    const isPrivateDashboard = pageUrl.pathname.startsWith("/admin-trafico");
     const destination = request.headers.get("sec-fetch-dest") || "";
     const acceptsHtml = (request.headers.get("accept") || "").includes("text/html");
     const contentType = response.headers.get("content-type") || "";
     const isDocument = destination === "document" || acceptsHtml;
     const isHtml = contentType.includes("text/html");
 
-    if (!methodOk || !isDocument || !isHtml || response.status >= 400) {
+    if (isPrivateDashboard || !methodOk || !isDocument || !isHtml || response.status >= 400) {
       return response;
     }
 
