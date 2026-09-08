@@ -20,11 +20,16 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s globstar nullglob
+          decode_b64() {
+            local src="$1"
+            local dst="$2"
+            tr -dc 'A-Za-z0-9+/=' < "$src" | base64 -d > "$dst"
+          }
           for f in assets/desarrollos/**/*.webp.b64; do
-            base64 -d "$f" > "${f%.b64}"
+            decode_b64 "$f" "${f%.b64}"
           done
           if [ -f assets/desarrollos/cielo-galileo/hero.b64.txt ]; then
-            base64 -d assets/desarrollos/cielo-galileo/hero.b64.txt > assets/desarrollos/cielo-galileo/hero.webp
+            decode_b64 assets/desarrollos/cielo-galileo/hero.b64.txt assets/desarrollos/cielo-galileo/hero.webp
           fi
 
       - name: Validar imágenes
@@ -43,6 +48,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          shopt -s globstar nullglob
           rm -f assets/desarrollos/**/*.webp.b64
           rm -f assets/desarrollos/cielo-galileo/hero.b64.txt
           rm -f .github/media-v46.ready .github/scripts/media_v46_note.txt
