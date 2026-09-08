@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Decodificar imágenes WebP
+      - name: Decodificar imágenes WebP aprobadas
         shell: bash
         run: |
           set -euo pipefail
@@ -23,20 +23,22 @@ jobs:
           from pathlib import Path
           import base64, re
 
-          files = list(Path('assets/desarrollos').glob('**/*.webp.b64'))
-          special = Path('assets/desarrollos/cielo-galileo/hero.b64.txt')
-          if special.exists():
-              files.append(special)
-
-          for src in files:
+          mapping = [
+            ('assets/desarrollos/cielo-galileo/galeria-1.webp.b64', 'assets/desarrollos/cielo-galileo/hero.webp'),
+            ('assets/desarrollos/cielo-galileo/galeria-2.webp.b64', 'assets/desarrollos/cielo-galileo/galeria-1.webp'),
+            ('assets/desarrollos/lomas-del-prado/hero.webp.b64', 'assets/desarrollos/lomas-del-prado/hero.webp'),
+            ('assets/desarrollos/lomas-del-prado/galeria-1.webp.b64', 'assets/desarrollos/lomas-del-prado/galeria-1.webp'),
+          ]
+          for src_name, dst_name in mapping:
+              src = Path(src_name)
               raw = src.read_text(encoding='utf-8', errors='ignore')
               clean = re.sub(r'[^A-Za-z0-9+/]', '', raw)
+              if len(clean) % 4 == 1:
+                  raise RuntimeError(f'{src}: base64 incompleto')
               clean += '=' * ((4 - len(clean) % 4) % 4)
               data = base64.b64decode(clean, validate=False)
-              if src.name == 'hero.b64.txt':
-                  dst = src.with_name('hero.webp')
-              else:
-                  dst = Path(str(src)[:-4])
+              dst = Path(dst_name)
+              dst.parent.mkdir(parents=True, exist_ok=True)
               dst.write_bytes(data)
               print(f'{src} -> {dst} ({len(data)} bytes)')
           PY
@@ -50,10 +52,8 @@ jobs:
           files = [
             Path('assets/desarrollos/cielo-galileo/hero.webp'),
             Path('assets/desarrollos/cielo-galileo/galeria-1.webp'),
-            Path('assets/desarrollos/cielo-galileo/galeria-2.webp'),
             Path('assets/desarrollos/lomas-del-prado/hero.webp'),
             Path('assets/desarrollos/lomas-del-prado/galeria-1.webp'),
-            Path('assets/desarrollos/lomas-del-prado/fotograma-video.webp'),
           ]
           for p in files:
               data = p.read_bytes()
