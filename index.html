@@ -2742,6 +2742,7 @@ load();
     margin:18px 0 22px;border:1px solid rgba(10,74,91,.12);border-radius:24px;
     overflow:hidden;background:#fff;box-shadow:0 15px 38px rgba(13,48,60,.08)
   }
+  .quote-body>.quote-lot-location:first-child{margin-top:0}
   .quote-lot-location-head{
     display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:19px 21px;
     background:linear-gradient(135deg,#f5fbfa,#edf6f6);border-bottom:1px solid rgba(10,74,91,.08)
@@ -2904,9 +2905,17 @@ load();
     const {model,lot}=selectedQuote;
     const body=document.querySelector("#quoteContent .quote-body");
     if(!body||body.querySelector(".quote-lot-location"))return;
+
+    /* El plano resaltado sustituye la fotografía en la cotización. */
+    const photoSlot=body.querySelector(".quote-photo-slot");
+    if(photoSlot){
+      photoSlot.outerHTML=planHtml(model,lot);
+      return;
+    }
+
+    /* Respaldo por compatibilidad con versiones anteriores del modal. */
     const summary=body.querySelector(".quote-summary");
-    if(!summary)return;
-    summary.insertAdjacentHTML("afterend",planHtml(model,lot));
+    if(summary)summary.insertAdjacentHTML("beforebegin",planHtml(model,lot));
   }
 
   window.renderQuoteModal=function(preserve=false){
