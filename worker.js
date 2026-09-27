@@ -1,3 +1,4 @@
+// DEPLOY_REFRESH_MANZANA_EXACT_LOT_2026_09_27
 // DEPLOY_REFRESH_V45_EXACT_LOT_POSITIONS_2026_09_27
 // DEPLOY_REFRESH_V45_LOT_PLANS_2026_09_27
 const SUPABASE_REST = "https://cisiancuphdkybkddwmq.supabase.co/rest/v1/web_analytics_events";
