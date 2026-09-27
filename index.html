@@ -1943,25 +1943,12 @@ function renderLots(){
     const p=resolvePrice(model,lot);
     const pct=p.ok && Number(p.downPct)>0 ? `${money(p.downPct)}%` : "Consultar";
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
-    const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";
-    const useVerifiedPlan=canon(model.name)===canon("Lomas del Valle");
-    const photoInfo=getLotPhoto(lot,model);
+    const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";    const photoInfo=getLotPhoto(lot,model);
     const photo=photoInfo.url;
-    const visual=useVerifiedPlan
-      ? `<div class="lot-plan-card">
-          <div class="lot-plan-card-top"><span>Ubicación del lote</span><b>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</b></div>
-          <div class="lot-card-plan-host"
-            data-plan-dev="${esc(model.name)}"
-            data-plan-members="${esc((model.members||[]).join("||"))}"
-            data-plan-mz="${esc(lot.manzana||"")}"
-            data-plan-lot="${esc(lot.lote||"")}">
-            <div class="lot-card-plan-loading"><span>⌖</span><strong>Localizando lote…</strong></div>
-          </div>
-        </div>`
-      : photo
-        ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
-        : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
-    return `
+    const visual=photo
+      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
+      : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
+    return 
       <article class="lot">
         ${visual}
         <div class="lot-body">
@@ -1979,7 +1966,6 @@ function renderLots(){
 
   const more=document.getElementById("moreLots");
   more.style.display=list.length>state.lotsShown?"inline-block":"none";
-  window.observeLotPlanCards?.(grid);
 }
 
 
@@ -2181,25 +2167,11 @@ function renderDevelopmentLots(){
     const esquina=l.es_esquina===true?"Sí":l.es_esquina===false?"No":"Consultar";
     const plans=planOptionsForLot(m,l,{downPct:Number(developmentFilters.downPct)||0,term:Number(developmentFilters.term)||0});
     const monthly=plans.length?Math.min(...plans.map(x=>convertQuoteValue(x.monthly,developmentFilters.currency))):null;
-    const monthlyText=Number.isFinite(monthly)?`${new Intl.NumberFormat(developmentFilters.currency==="MXN"?"es-MX":"en-US",{maximumFractionDigits:2}).format(monthly)} ${developmentFilters.currency}`:"Consultar";
-    const useVerifiedPlan=canon(m.name)===canon("Lomas del Valle");
-    const photoInfo=getLotPhoto(l,m);
+    const monthlyText=Number.isFinite(monthly)?`${new Intl.NumberFormat(developmentFilters.currency==="MXN"?"es-MX":"en-US",{maximumFractionDigits:2}).format(monthly)} ${developmentFilters.currency}`:"Consultar";    const photoInfo=getLotPhoto(l,m);
     const photo=photoInfo.url;
-    const visual=useVerifiedPlan
-      ? `<div class="lot-plan-card lot-plan-card-modal">
-          <div class="lot-plan-card-top"><span>Ubicación real</span><b>Mz ${esc(l.manzana||"—")} · Lote ${esc(l.lote||"—")}</b></div>
-          <div class="lot-card-plan-host"
-            data-plan-dev="${esc(m.name)}"
-            data-plan-members="${esc((m.members||[]).join("||"))}"
-            data-plan-mz="${esc(l.manzana||"")}"
-            data-plan-lot="${esc(l.lote||"")}">
-            <div class="lot-card-plan-loading"><span>⌖</span><strong>Localizando lote…</strong></div>
-          </div>
-        </div>`
-      : `<div class="mlot-photo">${photo
-          ? `<img src="${esc(photo)}" alt="${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span>`
-          : `<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>Sin fotografía propia ni imagen del desarrollo revisada.</span></div></div>`
-        }</div>`;
+    const visual=photo
+      ? `<div class="mlot-photo"><img src="${esc(photo)}" alt="${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
+      : `<div class="mlot-photo"><div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>Sin fotografía propia ni imagen del desarrollo revisada.</span></div></div></div>`;
     return `<article class="mlot premium-lot-card">
       ${visual}
       <div class="mlot-body">
@@ -2216,7 +2188,6 @@ function renderDevelopmentLots(){
       </div>
     </article>`;
   }).join("");
-  window.observeLotPlanCards?.(wrap);
 }
 function openDevelopment(id){
   const m=state.models.find(x=>x.id===id);
@@ -3393,7 +3364,7 @@ load();
   }
 </style>
 
-<script id="catalogo-v47-internal-development-lot-closeup-script">
+<script id="catalogo-v47-internal-development-lot-closeup-script" type="text/plain">
 (function(){
   function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
   function token(v){
