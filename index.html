@@ -1940,15 +1940,20 @@ function renderLots(){
 
   const shown=list.slice(0,state.lotsShown);
   grid.innerHTML=shown.map(({lot,model})=>{
-    const photoInfo=getLotPhoto(lot,model);
-    const photo=photoInfo.url;
     const p=resolvePrice(model,lot);
     const pct=p.ok && Number(p.downPct)>0 ? `${money(p.downPct)}%` : "Consultar";
     const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
     const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";
-    const visual=photo
-      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
-      : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
+    const visual=`<div class="lot-plan-card">
+      <div class="lot-plan-card-top"><span>Ubicación del lote</span><b>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</b></div>
+      <div class="lot-card-plan-host"
+        data-plan-dev="${esc(model.name)}"
+        data-plan-members="${esc((model.members||[]).join("||"))}"
+        data-plan-mz="${esc(lot.manzana||"")}"
+        data-plan-lot="${esc(lot.lote||"")}">
+        <div class="lot-card-plan-loading"><span>⌖</span><strong>Localizando lote…</strong></div>
+      </div>
+    </div>`;
     return `
       <article class="lot">
         ${visual}
@@ -1967,6 +1972,7 @@ function renderLots(){
 
   const more=document.getElementById("moreLots");
   more.style.display=list.length>state.lotsShown?"inline-block":"none";
+  window.observeLotPlanCards?.(grid);
 }
 
 
@@ -2166,13 +2172,20 @@ function renderDevelopmentLots(){
     const p=resolvePrice(m,l),pct=p.ok&&Number(p.downPct)>0?`${money(p.downPct)}%`:"Consultar";
     const talud=l.tiene_talud===true?"Sí":l.tiene_talud===false?"No":"Consultar";
     const esquina=l.es_esquina===true?"Sí":l.es_esquina===false?"No":"Consultar";
-    const photoInfo=getLotPhoto(l,m);
-    const photo=photoInfo.url;
     const plans=planOptionsForLot(m,l,{downPct:Number(developmentFilters.downPct)||0,term:Number(developmentFilters.term)||0});
     const monthly=plans.length?Math.min(...plans.map(x=>convertQuoteValue(x.monthly,developmentFilters.currency))):null;
     const monthlyText=Number.isFinite(monthly)?`$${new Intl.NumberFormat(developmentFilters.currency==="MXN"?"es-MX":"en-US",{maximumFractionDigits:2}).format(monthly)} ${developmentFilters.currency}`:"Consultar";
-    return `<article class="mlot">
-      <div class="mlot-photo">${photo?`<img src="${esc(photo)}" alt="${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span>`:`<div class="mlot-photo-placeholder"><div><b>📷 Fotografía por agregar</b><span>Sin fotografía propia ni imagen del desarrollo revisada.</span></div></div>`}</div>
+    return `<article class="mlot premium-lot-card">
+      <div class="lot-plan-card lot-plan-card-modal">
+        <div class="lot-plan-card-top"><span>Ubicación real</span><b>Mz ${esc(l.manzana||"—")} · Lote ${esc(l.lote||"—")}</b></div>
+        <div class="lot-card-plan-host"
+          data-plan-dev="${esc(m.name)}"
+          data-plan-members="${esc((m.members||[]).join("||"))}"
+          data-plan-mz="${esc(l.manzana||"")}"
+          data-plan-lot="${esc(l.lote||"")}">
+          <div class="lot-card-plan-loading"><span>⌖</span><strong>Localizando lote…</strong></div>
+        </div>
+      </div>
       <div class="mlot-body">
         <div class="mlot-head"><div><strong>Lote ${esc(l.lote||"—")}</strong><div class="sub">${esc(m.name)} · Mz ${esc(l.manzana||"—")}</div></div>${l.es_esquina===true?`<span class="corner-badge">◆ ESQUINA</span>`:""}</div>
         <div class="mlot-grid">
@@ -2187,6 +2200,7 @@ function renderDevelopmentLots(){
       </div>
     </article>`;
   }).join("");
+  window.observeLotPlanCards?.(wrap);
 }
 function openDevelopment(id){
   const m=state.models.find(x=>x.id===id);
@@ -3163,6 +3177,144 @@ load();
 </style>
 <!-- /CATALOGO_V41_APPOINTMENT_COURTESY -->
 
+
+
+<!-- CATALOGO_V45_LOT_CARD_PLANS -->
+<style id="catalogo-v45-lot-card-plans-style">
+  .lot-plan-card{position:relative;height:225px;overflow:hidden;background:#edf2f2;border-bottom:1px solid rgba(14,61,74,.08)}
+  .lot-plan-card-modal{height:235px}
+  .lot-plan-card-top{position:absolute;z-index:8;left:12px;right:12px;top:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+  .lot-plan-card-top span,.lot-plan-card-top b{padding:8px 11px;border-radius:999px;font-size:.68rem;font-weight:950;box-shadow:0 7px 20px rgba(0,0,0,.15)}
+  .lot-plan-card-top span{background:rgba(7,38,48,.90);color:#fff}
+  .lot-plan-card-top b{background:rgba(255,255,255,.95);color:#153c47}
+  .lot-card-plan-host{position:absolute;inset:0;display:grid;place-items:center;background:#edf2f2}
+  .lot-card-plan-host svg{width:100%;height:100%;display:block;background:#edf2f2}
+  .lot-card-plan-other{opacity:.23!important}
+  .lot-card-plan-target{opacity:1!important;fill:#ffd638!important;stroke:#d51f2a!important;stroke-width:9px!important;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #ffd638) drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+  .lot-card-plan-ring{fill:none;stroke:#d51f2a;stroke-width:7;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff);animation:lotCardRing 1.8s ease-out infinite}
+  .lot-card-plan-loading,.lot-card-plan-unavailable{display:grid;place-items:center;text-align:center;gap:6px;color:#33525b;padding:24px}
+  .lot-card-plan-loading span,.lot-card-plan-unavailable span{width:44px;height:44px;border-radius:15px;background:#dbeaea;color:#0b6570;display:grid;place-items:center;font-size:1.1rem;font-weight:950}
+  .lot-card-plan-unavailable small{max-width:260px;color:#718187;font-size:.7rem;line-height:1.4}
+  @keyframes lotCardRing{0%{opacity:.95;stroke-width:7}100%{opacity:.15;stroke-width:19}}
+
+  .modal-lots{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+  .premium-lot-card{border:1px solid rgba(19,59,70,.10)!important;border-radius:22px!important;background:#fffdfa!important;box-shadow:0 16px 38px rgba(13,41,51,.09)!important;transition:.18s ease}
+  .premium-lot-card:hover{transform:translateY(-2px);box-shadow:0 24px 48px rgba(13,41,51,.14)!important}
+  .premium-lot-card .mlot-body{padding:18px}
+  .premium-lot-card .mlot-head strong{font-size:1.08rem;color:#132f39}
+  .premium-lot-card .mlot-grid{gap:8px;margin-top:14px}
+  .premium-lot-card .mlot-grid>div{padding:10px 11px;border-radius:13px;background:#f3eee6;border:1px solid rgba(28,59,69,.05)}
+  .premium-lot-card .mlot-grid small{text-transform:uppercase;letter-spacing:.04em;font-weight:800}
+  .premium-lot-card .mlot-monthly{margin-top:11px;padding:12px 13px;border-radius:14px;background:linear-gradient(135deg,#edf8f6,#dff0ee)}
+  .premium-lot-card .mlot-monthly strong{font-size:1rem;color:#075b66}
+  .premium-lot-card button{margin-top:11px!important;padding:12px 14px!important;border-radius:13px!important;background:linear-gradient(135deg,#084a5a,#0e6976)!important;box-shadow:0 10px 22px rgba(8,74,90,.16);font-size:.92rem!important}
+
+  .lots-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+  .lot{border-radius:22px;box-shadow:0 16px 38px rgba(13,41,51,.09)}
+  .lot-body{padding:18px}
+  .lot h3{font-size:1.12rem;color:#14323d}
+  .lot-btn{margin-top:12px;padding:13px 14px;border-radius:13px;font-size:.94rem}
+
+  @media(max-width:900px){.modal-lots,.lots-grid{grid-template-columns:1fr}}
+  @media(max-width:680px){
+    .lot-plan-card,.lot-plan-card-modal{height:205px}
+    .lot-plan-card-top{left:9px;right:9px;top:9px}
+    .lot-plan-card-top span,.lot-plan-card-top b{font-size:.62rem;padding:7px 9px}
+  }
+</style>
+<script id="catalogo-v45-lot-card-plans-script">
+(function(){
+  const ENDPOINT="https://cisiancuphdkybkddwmq.supabase.co/functions/v1/vive-plano-publico";
+  const cache=new Map();
+
+  function tok(v){
+    const s=String(v??"").trim();
+    return /^0*\d+$/.test(s)?String(Number(s)):s.replace(/\s+/g,"").toUpperCase();
+  }
+  function suffix(mz,lote){return `M${tok(mz)}-L${tok(lote)}`.toUpperCase()}
+  function unique(a){return [...new Set(a.filter(Boolean).map(v=>String(v).trim()).filter(Boolean))]}
+  function viewBox(svg){
+    const a=(svg.getAttribute("viewBox")||"").trim().split(/[ ,]+/).map(Number);
+    return a.length===4&&a.every(Number.isFinite)?{x:a[0],y:a[1],w:a[2],h:a[3],raw:a.join(" ")}:null;
+  }
+  function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+  function zoomBox(o,b){
+    if(!o||!b)return o?.raw||"";
+    const w=Math.min(o.w,Math.max(b.width*12,o.w*.20));
+    const h=Math.min(o.h,Math.max(b.height*14,o.h*.24));
+    const cx=b.x+b.width/2,cy=b.y+b.height/2;
+    return `${clamp(cx-w/2,o.x,o.x+o.w-w)} ${clamp(cy-h/2,o.y,o.y+o.h-h)} ${w} ${h}`;
+  }
+  async function fetchPlan(names){
+    let last=null;
+    for(const name of unique(names)){
+      const key=name.toLowerCase();
+      if(cache.has(key))return cache.get(key);
+      try{
+        const r=await fetch(`${ENDPOINT}?dev=${encodeURIComponent(name)}`,{headers:{Accept:"image/svg+xml"}});
+        if(!r.ok){last=new Error(String(r.status));continue}
+        const t=await r.text();
+        if(!/^\s*<svg\b/i.test(t)){last=new Error("invalid");continue}
+        cache.set(key,t);return t;
+      }catch(e){last=e}
+    }
+    throw last||new Error("unavailable");
+  }
+  function clean(doc){
+    doc.querySelectorAll("script,foreignObject").forEach(n=>n.remove());
+    doc.querySelectorAll("*").forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)}));
+    const svg=doc.documentElement;
+    svg.removeAttribute("width");svg.removeAttribute("height");
+    svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+    return svg;
+  }
+  async function hydrate(host){
+    if(host.dataset.planReady==="1")return;
+    host.dataset.planReady="1";
+    try{
+      const text=await fetchPlan([host.dataset.planDev,...String(host.dataset.planMembers||"").split("||")]);
+      const doc=new DOMParser().parseFromString(text,"image/svg+xml");
+      if(doc.querySelector("parsererror"))throw new Error("parse");
+      const svg=clean(doc);
+      const wanted=suffix(host.dataset.planMz,host.dataset.planLot);
+      const target=[...svg.querySelectorAll("[id]")].find(el=>String(el.id||"").trim().toUpperCase().endsWith(wanted));
+      if(!target)throw new Error("lot-not-found");
+      target.classList.add("lot-card-plan-target");
+      svg.querySelectorAll('[id*="-L"],[id*="-l"]').forEach(el=>{if(el!==target)el.classList.add("lot-card-plan-other")});
+      host.replaceChildren(svg);
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      let b=null;try{b=target.getBBox()}catch(_){}
+      const o=viewBox(svg),z=zoomBox(o,b);
+      if(z)svg.setAttribute("viewBox",z);
+      if(b){
+        const ns="http://www.w3.org/2000/svg";
+        const ring=document.createElementNS(ns,"ellipse");
+        ring.setAttribute("class","lot-card-plan-ring");
+        ring.setAttribute("cx",String(b.x+b.width/2));ring.setAttribute("cy",String(b.y+b.height/2));
+        ring.setAttribute("rx",String(Math.max(b.width*.85,20)));ring.setAttribute("ry",String(Math.max(b.height*.85,20)));
+        target.parentNode?.appendChild(ring);
+      }
+    }catch(e){
+      host.innerHTML='<div class="lot-card-plan-unavailable"><span>⌖</span><strong>Plano en validación</strong><small>La ubicación exacta de este lote todavía no está vinculada al plano.</small></div>';
+    }
+  }
+
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){observer.unobserve(e.target);hydrate(e.target)}
+    });
+  },{rootMargin:"250px 0px"});
+
+  window.observeLotPlanCards=function(scope=document){
+    scope.querySelectorAll(".lot-card-plan-host").forEach(el=>{
+      if(el.dataset.planObserved==="1")return;
+      el.dataset.planObserved="1";observer.observe(el);
+    });
+  };
+  window.observeLotPlanCards(document);
+})();
+</script>
+<!-- /CATALOGO_V45_LOT_CARD_PLANS -->
 
 <!-- SEO_CITY_ROUTE_V44 -->
 <script>
