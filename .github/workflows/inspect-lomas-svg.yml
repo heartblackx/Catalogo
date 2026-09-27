@@ -1,0 +1,44 @@
+name: Inspect Lomas del Valle SVG
+on:
+  push:
+    paths:
+      - ".github/workflows/inspect-lomas-svg.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and inspect SVG
+        run: |
+          python - <<'PY'
+          import re, urllib.request, html
+          url='https://experience.viveenlabaja.mx/data/Lomas%20del%20Valle.svg'
+          txt=urllib.request.urlopen(url, timeout=30).read().decode('utf-8','replace')
+          out=[]
+          for lot in range(123,131):
+              pats=[
+                  rf'id="([^"]*M17-L{lot}[^"]*)"',
+                  rf"id='([^']*M17-L{lot}[^']*)'"
+              ]
+              matches=[]
+              for p in pats:
+                  matches += re.findall(p, txt, re.I)
+              out.append(f'LOT {lot}: ids={matches!r}')
+              for m in matches[:5]:
+                  idx=txt.lower().find(('id="'+m+'"').lower())
+                  if idx<0: idx=txt.lower().find(("id='"+m+"'").lower())
+                  out.append(txt[max(0,idx-500):idx+1800].replace('\n',' ')[:2300])
+              out.append('')
+          open('debug-lomas-svg.txt','w',encoding='utf-8').write('\n'.join(out))
+          PY
+      - name: Commit inspection
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add debug-lomas-svg.txt
+          git commit -m "debug: inspect lomas del valle svg ids" || exit 0
+          git push
