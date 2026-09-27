@@ -1,3 +1,4 @@
+// DEPLOY_REFRESH_V47_INTERNAL_CLOSEUP_2026_09_27
 // DEPLOY_REFRESH_INTERNAL_LOT_ZOOM_2026_09_27
 // DEPLOY_REFRESH_LOT_CONTEXT_VIEW_2026_09_27
 // DEPLOY_REFRESH_MANZANA_EXACT_LOT_2026_09_27
@@ -131,6 +132,10 @@ export default {
     if (isBot) return response;
 
     const headers = new Headers(response.headers);
+    headers.set("Cache-Control","no-store, no-cache, must-revalidate");
+    headers.set("Pragma","no-cache");
+    headers.set("Expires","0");
+    headers.set("X-Catalog-Version","v47-internal-closeup");
     headers.append("Set-Cookie", `ii_vid=${encodeURIComponent(visitorId)}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`);
     headers.append("Set-Cookie", `ii_sid=${encodeURIComponent(sessionId)}; Max-Age=1800; Path=/; HttpOnly; Secure; SameSite=Lax`);
 
