@@ -3190,10 +3190,10 @@ load();
   .lot-card-plan-host{position:absolute;inset:0;display:grid;place-items:center;background:#edf2f2}
   .lot-card-plan-host svg{width:100%;height:100%;display:block;background:#edf2f2}
   .lot-card-plan-other{opacity:.42!important}
-  .lot-card-plan-target{opacity:1!important;fill:#ffd638!important;stroke:#d51f2a!important;stroke-width:7px!important;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px #ffd638) drop-shadow(0 3px 5px rgba(0,0,0,.32))}
-  .lot-card-plan-target-shape{opacity:1!important;fill:#ffd638!important;stroke:#d51f2a!important;stroke-width:7px!important;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px #ffd638)}
-  .lot-card-plan-ring{fill:none;stroke:#d51f2a;stroke-width:6;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff);animation:lotCardRing 1.8s ease-out infinite}
-  .lot-card-plan-dot{fill:#d51f2a;stroke:#fff;stroke-width:4;vector-effect:non-scaling-stroke;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+  .lot-card-plan-target{opacity:1!important;fill:#ffd638!important;stroke:#d51f2a!important;stroke-width:10px!important;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #ffd638) drop-shadow(0 3px 5px rgba(0,0,0,.32))}
+  .lot-card-plan-target-shape{opacity:1!important;fill:#ffd638!important;stroke:#d51f2a!important;stroke-width:10px!important;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #ffd638)}
+  .lot-card-plan-lbl-bg{fill:#103c49;stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke;filter:drop-shadow(0 2px 4px rgba(0,0,0,.28))}
+  .lot-card-plan-lbl-text{fill:#fff;font-weight:950;font-size:24px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
   .lot-card-plan-loading,.lot-card-plan-unavailable{display:grid;place-items:center;text-align:center;gap:6px;color:#33525b;padding:24px}
   .lot-card-plan-loading span,.lot-card-plan-unavailable span{width:44px;height:44px;border-radius:15px;background:#dbeaea;color:#0b6570;display:grid;place-items:center;font-size:1.1rem;font-weight:950}
   .lot-card-plan-unavailable small{max-width:260px;color:#718187;font-size:.7rem;line-height:1.4}
@@ -3240,10 +3240,22 @@ load();
     return a.length===4&&a.every(Number.isFinite)?{x:a[0],y:a[1],w:a[2],h:a[3],raw:a.join(" ")}:null;
   }
   function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
-  function zoomBox(o,b){
-    /* En tarjetas conservamos el plano original para que cada lote
-       se vea en su posición real y no parezca centrado artificialmente. */
-    return o?.raw||"";
+  function manzanaViewBox(svg,mz,original){
+    if(!original)return "";
+    const id=`M${tok(mz)}`;
+    const group=svg.querySelector(`g[id="${CSS.escape(id)}"]`) || svg.querySelector(`[id="${CSS.escape(id)}"]`);
+    if(!group)return original.raw;
+    let b=null;try{b=group.getBBox()}catch(_){}
+    if(!b||!b.width||!b.height)return original.raw;
+    const padX=Math.max(b.width*.10,45);
+    const padY=Math.max(b.height*.06,45);
+    const x=clamp(b.x-padX,original.x,original.x+original.w);
+    const y=clamp(b.y-padY,original.y,original.y+original.h);
+    const maxW=original.x+original.w-x;
+    const maxH=original.y+original.h-y;
+    const w=Math.min(b.width+padX*2,maxW);
+    const h=Math.min(b.height+padY*2,maxH);
+    return `${x} ${y} ${w} ${h}`;
   }
   async function fetchPlan(names){
     let last=null;
@@ -3298,25 +3310,35 @@ load();
       await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
 
       let b=null;try{b=target.getBBox()}catch(_){}
-      const o=viewBox(svg),z=zoomBox(o,b);
+      const o=viewBox(svg);
+      const z=manzanaViewBox(svg,host.dataset.planMz,o);
       if(z)svg.setAttribute("viewBox",z);
 
-      if(b && o){
+      if(b){
         const ns="http://www.w3.org/2000/svg";
         const cx=b.x+b.width/2, cy=b.y+b.height/2;
-        const r=Math.max(Math.min(o.w,o.h)*.018, Math.max(b.width,b.height)*.9);
+        const g=document.createElementNS(ns,"g");
+        g.setAttribute("pointer-events","none");
 
-        const ring=document.createElementNS(ns,"circle");
-        ring.setAttribute("class","lot-card-plan-ring");
-        ring.setAttribute("cx",String(cx)); ring.setAttribute("cy",String(cy));
-        ring.setAttribute("r",String(r));
-        svg.appendChild(ring);
+        const bg=document.createElementNS(ns,"rect");
+        const label=`L${host.dataset.planLot}`;
+        const labelW=Math.max(78,label.length*22);
+        const labelH=42;
+        bg.setAttribute("class","lot-card-plan-lbl-bg");
+        bg.setAttribute("x",String(cx-labelW/2));
+        bg.setAttribute("y",String(cy-labelH/2));
+        bg.setAttribute("width",String(labelW));
+        bg.setAttribute("height",String(labelH));
+        bg.setAttribute("rx","14");
 
-        const dot=document.createElementNS(ns,"circle");
-        dot.setAttribute("class","lot-card-plan-dot");
-        dot.setAttribute("cx",String(cx)); dot.setAttribute("cy",String(cy));
-        dot.setAttribute("r",String(Math.max(Math.min(o.w,o.h)*.006,2)));
-        svg.appendChild(dot);
+        const tx=document.createElementNS(ns,"text");
+        tx.setAttribute("class","lot-card-plan-lbl-text");
+        tx.setAttribute("x",String(cx));
+        tx.setAttribute("y",String(cy+1));
+        tx.textContent=label;
+
+        g.append(bg,tx);
+        svg.appendChild(g);
       }
     }catch(e){
       host.innerHTML='<div class="lot-card-plan-unavailable"><span>⌖</span><strong>Plano en validación</strong><small>La ubicación exacta de este lote todavía no está vinculada al plano.</small></div>';
