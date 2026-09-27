@@ -2933,17 +2933,22 @@ load();
   function injectLotPlan(){
     if(typeof selectedQuote==="undefined"||!selectedQuote)return;
     const {model,lot}=selectedQuote;
+
+    /* Regla segura:
+       Solo sustituimos la foto cuando el desarrollo está verificado
+       lote por lote contra su SVG oficial. */
+    const verified=norm(model?.name)==="lomas-del-valle";
+    if(!verified)return;
+
     const body=document.querySelector("#quoteContent .quote-body");
     if(!body||body.querySelector(".quote-lot-location"))return;
 
-    /* El plano resaltado sustituye la fotografía en la cotización. */
     const photoSlot=body.querySelector(".quote-photo-slot");
     if(photoSlot){
       photoSlot.outerHTML=planHtml(model,lot);
       return;
     }
 
-    /* Respaldo por compatibilidad con versiones anteriores del modal. */
     const summary=body.querySelector(".quote-summary");
     if(summary)summary.insertAdjacentHTML("beforebegin",planHtml(model,lot));
   }
