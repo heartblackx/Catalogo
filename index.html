@@ -3181,8 +3181,8 @@ load();
 
 <!-- CATALOGO_V45_LOT_CARD_PLANS -->
 <style id="catalogo-v45-lot-card-plans-style">
-  .lot-plan-card{position:relative;height:250px;overflow:hidden;background:#edf2f2;border-bottom:1px solid rgba(14,61,74,.08)}
-  .lot-plan-card-modal{height:265px}
+  .lot-plan-card{position:relative;height:270px;overflow:hidden;background:#edf2f2;border-bottom:1px solid rgba(14,61,74,.08)}
+  .lot-plan-card-modal{height:285px}
   .lot-plan-card-top{position:absolute;z-index:8;left:12px;right:12px;top:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
   .lot-plan-card-top span,.lot-plan-card-top b{padding:8px 11px;border-radius:999px;font-size:.68rem;font-weight:950;box-shadow:0 7px 20px rgba(0,0,0,.15)}
   .lot-plan-card-top span{background:rgba(7,38,48,.90);color:#fff}
@@ -3219,7 +3219,7 @@ load();
 
   @media(max-width:900px){.modal-lots,.lots-grid{grid-template-columns:1fr}}
   @media(max-width:680px){
-    .lot-plan-card,.lot-plan-card-modal{height:225px}
+    .lot-plan-card,.lot-plan-card-modal{height:240px}
     .lot-plan-card-top{left:9px;right:9px;top:9px}
     .lot-plan-card-top span,.lot-plan-card-top b{font-size:.62rem;padding:7px 9px}
   }
@@ -3242,33 +3242,35 @@ load();
   function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
   function lotContextViewBox(svg,mz,targetBox,original){
     if(!original||!targetBox)return original?.raw||"";
-    const id=`M${tok(mz)}`;
-    const group=svg.querySelector(`g[id="${CSS.escape(id)}"]`) || svg.querySelector(`[id="${CSS.escape(id)}"]`);
-    let g=null;try{g=group?.getBBox()}catch(_){}
-    if(!g||!g.width||!g.height)g=original;
 
-    /* Vista cercana como la cotización: conserva calles y vecinos,
-       pero el polígono seleccionado sigue siendo claramente distinguible. */
-    const cardAspect=2.18;
-    let w=Math.max(targetBox.width*10,g.width*.42);
-    let h=Math.max(targetBox.height*9,g.height*.28);
+    /* IMPORTANTE:
+       Esta vista se calcula SOLO desde el polígono exacto del lote.
+       No usamos el bbox de la manzana porque en desarrollos grandes
+       provoca que el lote vuelva a verse como un punto perdido. */
+    const cardAspect=2.10;
+    const cx=targetBox.x+targetBox.width/2;
+    const cy=targetBox.y+targetBox.height/2;
+
+    let w=Math.max(targetBox.width*5.2,520);
+    let h=Math.max(targetBox.height*5.2,300);
 
     if(w/h<cardAspect)w=h*cardAspect;
     else h=w/cardAspect;
 
-    w=Math.min(w,original.w);
-    h=Math.min(h,original.h);
+    /* límites razonables para conservar calles y 4-8 lotes vecinos */
+    w=Math.min(w,original.w*.32);
+    h=Math.min(h,original.h*.32);
 
-    const cx=targetBox.x+targetBox.width/2;
-    const cy=targetBox.y+targetBox.height/2;
+    /* Reaplicar aspecto después de limitar */
+    if(w/h<cardAspect)w=Math.min(h*cardAspect,original.w);
+    else h=Math.min(w/cardAspect,original.h);
 
-    /* El lote queda ligeramente a la izquierda del centro para mostrar
-       más contexto hacia la derecha, como en la vista grande de cotización. */
-    let x=cx-w*.42;
+    let x=cx-w*.50;
     let y=cy-h*.50;
 
     x=clamp(x,original.x,original.x+original.w-w);
     y=clamp(y,original.y,original.y+original.h-h);
+
     return `${x} ${y} ${w} ${h}`;
   }
   async function fetchPlan(names){
