@@ -1,0 +1,121 @@
+from pathlib import Path
+
+p=Path('index.html')
+s=p.read_text(encoding='utf-8')
+marker='<!-- CATALOGO_V49_NO_CROP_DEVELOPMENT_IMAGES -->'
+if marker not in s:
+    patch=r'''
+<!-- CATALOGO_V49_NO_CROP_DEVELOPMENT_IMAGES -->
+<style id="catalogo-v49-no-crop-development-images-style">
+  /* Portadas: respetar proporción natural completa, sin recortes. */
+  #devGrid .dev-photo{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    display:block!important;
+    padding:0!important;
+    overflow:visible!important;
+    background:#edf2f1!important;
+  }
+  #devGrid .dev-photo>img{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    object-position:center center!important;
+    transform:none!important;
+    clip-path:none!important;
+    margin:0 auto!important;
+    border-radius:0!important;
+    background:#edf2f1!important;
+  }
+
+  /* Portada al abrir el desarrollo: imagen completa. */
+  #devModal .modal-hero,
+  #devModal .premium-hero-media{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    display:block!important;
+    padding:0!important;
+    overflow:visible!important;
+    background:#edf2f1!important;
+  }
+  #devModal .modal-hero>img,
+  #devModal .premium-hero-media>img{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    object-position:center center!important;
+    transform:none!important;
+    clip-path:none!important;
+    margin:0 auto!important;
+    border-radius:0!important;
+    background:#edf2f1!important;
+  }
+
+  /* Galería: todas las fotos completas, conservando su relación real. */
+  #devModal .premium-gallery-shell .gallery,
+  #devModal .gallery{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important;
+    grid-auto-rows:auto!important;
+    gap:14px!important;
+    align-items:start!important;
+  }
+  #devModal .premium-gallery-shell .gallery img,
+  #devModal .gallery img{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+    object-fit:contain!important;
+    object-position:center center!important;
+    transform:none!important;
+    clip-path:none!important;
+    margin:0 auto!important;
+    padding:0!important;
+    border-radius:14px!important;
+    background:#edf2f1!important;
+  }
+  #devModal .gallery img:first-child{grid-row:auto!important}
+
+  /* Anula reglas históricas de ampliación/crop. */
+  #devGrid .dev-photo img,
+  #devModal .modal-hero img,
+  #devModal .premium-hero-media img,
+  #devModal .gallery img{
+    transform:none!important;
+    transform-origin:center!important;
+  }
+
+  @media(max-width:680px){
+    #devGrid .dev-photo,
+    #devModal .modal-hero,
+    #devModal .premium-hero-media{
+      height:auto!important;
+      min-height:0!important;
+      max-height:none!important;
+      padding:0!important;
+    }
+    #devModal .premium-gallery-shell .gallery,
+    #devModal .gallery{grid-template-columns:1fr!important}
+  }
+</style>
+<!-- /CATALOGO_V49_NO_CROP_DEVELOPMENT_IMAGES -->
+'''
+    s=s.replace('</body>',patch+'\n</body>',1)
+    p.write_text(s,encoding='utf-8')
+
+w=Path('worker.js')
+ws=w.read_text(encoding='utf-8')
+stamp='// DEPLOY_REFRESH_DEVELOPMENT_IMAGES_V49_2026_10_07\n'
+if not ws.startswith(stamp):
+    w.write_text(stamp+ws,encoding='utf-8')
