@@ -23,10 +23,6 @@ jobs:
               patch=r'''
 <!-- CATALOGO_V49_NO_CROP_DEVELOPMENT_IMAGES -->
 <style id="catalogo-v49-no-crop-development-images-style">
-  /*
-    Portadas de desarrollos: la imagen manda el alto.
-    Sin cover, sin zoom, sin crop y sin transformaciones antiguas.
-  */
   #devGrid .dev-photo{
     height:auto!important;
     min-height:0!important;
@@ -51,8 +47,6 @@ jobs:
     border-radius:0!important;
     background:#edf2f1!important;
   }
-
-  /* Portada grande al entrar a un desarrollo: proporción natural completa. */
   #devModal .modal-hero,
   #devModal .premium-hero-media{
     height:auto!important;
@@ -79,8 +73,6 @@ jobs:
     border-radius:0!important;
     background:#edf2f1!important;
   }
-
-  /* Galería: cada fotografía conserva su relación de aspecto real. */
   #devModal .premium-gallery-shell .gallery,
   #devModal .gallery{
     display:grid!important;
@@ -108,8 +100,6 @@ jobs:
     background:#edf2f1!important;
   }
   #devModal .gallery img:first-child{grid-row:auto!important}
-
-  /* Anular cualquier ajuste histórico por URL/hash que amplíe imágenes. */
   #devGrid .dev-photo img,
   #devModal .modal-hero img,
   #devModal .premium-hero-media img,
@@ -117,7 +107,6 @@ jobs:
     transform:none!important;
     transform-origin:center!important;
   }
-
   @media(max-width:680px){
     #devGrid .dev-photo,
     #devModal .modal-hero,
@@ -135,7 +124,6 @@ jobs:
 '''
               s=s.replace('</body>',patch+'\n</body>',1)
           p.write_text(s,encoding='utf-8')
-
           w=Path('worker.js')
           ws=w.read_text(encoding='utf-8')
           stamp='// DEPLOY_REFRESH_DEVELOPMENT_IMAGES_V49_2026_10_07\n'
@@ -150,3 +138,4 @@ jobs:
           git add index.html worker.js
           git commit -m 'fix: mostrar portadas completas sin recortar' || exit 0
           git push
+# trigger-v49-1
