@@ -1,2 +1,8 @@
+.git/
+.github/
+scripts/
+*.zip
+debug-*.txt
 worker.js
+wrangler.jsonc
 .assetsignore
