@@ -1,3 +1,4 @@
+// DEPLOY_REFRESH_HORIZONTAL_DEVELOPMENT_CARDS_V51_PUBLIC_2026_10_07
 // DEPLOY_REFRESH_HORIZONTAL_DEVELOPMENT_CARDS_V51_2026_10_07
 // DEPLOY_REFRESH_DEVELOPMENT_IMAGES_V50_2026_10_07
 // DEPLOY_REFRESH_DEVELOPMENT_IMAGES_V49_2026_10_07
@@ -103,14 +104,12 @@ async function recordPageView(request, visitorId, sessionId, isBot) {
       body: JSON.stringify(event)
     });
   } catch (_) {
-    // Analytics must never interfere with the catalog experience.
   }
 }
 
 export default {
   async fetch(request, env, ctx) {
     const response = await env.ASSETS.fetch(request);
-
     const methodOk = request.method === "GET";
     const pageUrl = new URL(request.url);
     const isPrivateDashboard = pageUrl.pathname.startsWith("/admin-trafico");
@@ -142,7 +141,7 @@ export default {
     headers.set("Cache-Control","no-store, no-cache, must-revalidate");
     headers.set("Pragma","no-cache");
     headers.set("Expires","0");
-    headers.set("X-Catalog-Version","v47-internal-closeup");
+    headers.set("X-Catalog-Version","v51-horizontal-development-cards");
     headers.append("Set-Cookie", `ii_vid=${encodeURIComponent(visitorId)}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`);
     headers.append("Set-Cookie", `ii_sid=${encodeURIComponent(sessionId)}; Max-Age=1800; Path=/; HttpOnly; Secure; SameSite=Lax`);
 
