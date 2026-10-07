@@ -1,15 +1,3 @@
-// DEPLOY_REFRESH_HORIZONTAL_DEVELOPMENT_CARDS_V51_PUBLIC_2026_10_07
-// DEPLOY_REFRESH_HORIZONTAL_DEVELOPMENT_CARDS_V51_2026_10_07
-// DEPLOY_REFRESH_DEVELOPMENT_IMAGES_V50_2026_10_07
-// DEPLOY_REFRESH_DEVELOPMENT_IMAGES_V49_2026_10_07
-// DEPLOY_REFRESH_DEVELOPMENT_MEDIA_V48_2026_10_07
-// DEPLOY_HOTFIX_RESTORE_CARD_IMAGES_2026_09_27
-// DEPLOY_REFRESH_RESTORE_UNVERIFIED_QUOTE_PHOTO_2026_09_27
-// DEPLOY_REFRESH_VERIFIED_MAPS_ONLY_2026_09_27
-// DEPLOY_REFRESH_V47_INTERNAL_CLOSEUP_2026_09_27
-// DEPLOY_REFRESH_INTERNAL_LOT_ZOOM_2026_09_27
-// DEPLOY_REFRESH_LOT_CONTEXT_VIEW_2026_09_27
-// DEPLOY_REFRESH_MANZANA_EXACT_LOT_2026_09_27
 // DEPLOY_REFRESH_V45_EXACT_LOT_POSITIONS_2026_09_27
 // DEPLOY_REFRESH_V45_LOT_PLANS_2026_09_27
 const SUPABASE_REST = "https://cisiancuphdkybkddwmq.supabase.co/rest/v1/web_analytics_events";
@@ -104,12 +92,14 @@ async function recordPageView(request, visitorId, sessionId, isBot) {
       body: JSON.stringify(event)
     });
   } catch (_) {
+    // Analytics must never interfere with the catalog experience.
   }
 }
 
 export default {
   async fetch(request, env, ctx) {
     const response = await env.ASSETS.fetch(request);
+
     const methodOk = request.method === "GET";
     const pageUrl = new URL(request.url);
     const isPrivateDashboard = pageUrl.pathname.startsWith("/admin-trafico");
@@ -138,10 +128,6 @@ export default {
     if (isBot) return response;
 
     const headers = new Headers(response.headers);
-    headers.set("Cache-Control","no-store, no-cache, must-revalidate");
-    headers.set("Pragma","no-cache");
-    headers.set("Expires","0");
-    headers.set("X-Catalog-Version","v51-horizontal-development-cards");
     headers.append("Set-Cookie", `ii_vid=${encodeURIComponent(visitorId)}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`);
     headers.append("Set-Cookie", `ii_sid=${encodeURIComponent(sessionId)}; Max-Age=1800; Path=/; HttpOnly; Secure; SameSite=Lax`);
 
