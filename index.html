@@ -1795,7 +1795,7 @@ function buildModels(){
     );
     const localMedia=(localEntry?.[1]||[]).map((public_url,orden)=>({public_url,portada:orden===0,orden,local:true}));
     const siteMedia=c.siteImage?[{public_url:c.siteImage,portada:true,orden:99,site:true}]:[];
-    const media=localMedia.length ? localMedia : (syncedMedia.length ? syncedMedia : siteMedia);
+    const media=syncedMedia.length ? syncedMedia : (localMedia.length ? localMedia : siteMedia);
     const loc=state.locations.find(x=>related(x.desarrollo,c.members) && x.activo!==false) || null;
     const lotMedia=state.lotMedia.filter(x=>related(x.desarrollo,c.members) && x.activo!==false);
 
@@ -1897,205 +1897,10 @@ function renderDevelopments(models){
 function getLotPhoto(lot,model){
   const direct=lot.foto_lote_public_url || lot.foto_lote_url || lot.urlfoto;
   if(direct) return {url:direct,type:"lote"};
-  const lm=model.lotMedia.find(x=>canon(x.manzana)===canon(lot.manzana)&&canon(x.lote)===canon(lot.lote)&&x.public_url);
+  const lm=(Array.isArray(model?.lotMedia)?model.lotMedia:[]).find(x=>canon(x.manzana)===canon(lot.manzana)&&canon(x.lote)===canon(lot.lote)&&x.public_url);
   if(lm?.public_url) return {url:lm.public_url,type:"lote"};
-  // Mientras no exista foto individual, usa únicamente una imagen REAL del desarrollo.
-  // Prioridad: galería sincronizada de Supabase; respaldo: imagen real registrada en el catálogo.
-  if(Array.isArray(model.media) && model.media.length){
-  const pool=model.media.filter(x=>x?.public_url);
-  if(pool.length){
-    const lotIndex=(Array.isArray(model.lots)?model.lots:[]).findIndex(x=>{
-      if(lot.id!=null && x.id!=null) return String(x.id)===String(lot.id);
-      return canon(x.manzana)===canon(lot.manzana) && canon(x.lote)===canon(lot.lote);
-    });
-    const key=`${lot.manzana||""}-${lot.lote||""}`;
-    let idx=lotIndex;
-    if(idx<0){
-      let hash=0;
-      for(let i=0;i<key.length;i++) hash=((hash*31)+key.charCodeAt(i))>>>0;
-      idx=hash;
-    }
-    const developmentPhoto=pool[idx % pool.length]?.public_url || model.cover || "";
-    if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};
-  }
-}
-  const developmentPhoto=model.cover || "";
-  if(developmentPhoto) return {url:developmentPhoto,type:"desarrollo"};
-  return {url:"",type:"ninguna"};
-}
-
-function renderLots(){
-  const grid=document.getElementById("lotsGrid");
-  const allowed=new Set(state.filtered.map(x=>x.id));
-  const list=state.filtered.flatMap(m=>m.available.map(l=>({lot:l,model:m})))
-    .sort((a,b)=>(a.model.name.localeCompare(b.model.name)) || String(a.lot.manzana).localeCompare(String(b.lot.manzana),undefined,{numeric:true}) || String(a.lot.lote).localeCompare(String(b.lot.lote),undefined,{numeric:true}));
-
-  document.getElementById("lotCountText").textContent=`${list.length} lotes disponibles en los desarrollos mostrados`;
-
-  if(!list.length){
-    grid.innerHTML=`<div class="state">No hay lotes disponibles para los filtros seleccionados.</div>`;
-    document.getElementById("moreLots").style.display="none";
-    return;
-  }
-
-  const shown=list.slice(0,state.lotsShown);
-  grid.innerHTML=shown.map(({lot,model})=>{
-    const p=resolvePrice(model,lot);
-    const pct=p.ok && Number(p.downPct)>0 ? `${money(p.downPct)}%` : "Consultar";
-    const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
-    const esquina=lot.es_esquina===true?"Sí":lot.es_esquina===false?"No":"Consultar";    const photoInfo=getLotPhoto(lot,model);
-    const photo=photoInfo.url;
-    const visual=photo
-      ? `<div class="lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="lot-tag">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
-      : `<div class="lot-photo no-photo"><span class="lot-tag">Disponible</span><div class="lot-placeholder"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía disponible</span></div></div></div>`;
-    return 
-      <article class="lot">
-        ${visual}
-        <div class="lot-body">
-          <h3>Lote ${esc(lot.lote||"—")}</h3>
-          <div class="lot-dev">${esc(model.name)} · Manzana ${esc(lot.manzana||"—")}</div>
-          <div class="lot-features">
-            <div class="lot-feature"><small>Medida</small><strong>${m2(lot.superficie_m2)}</strong></div>
-            <div class="lot-feature"><small>Enganche</small><strong>${esc(pct)}</strong></div>
-            <div class="lot-feature"><small>Esquina</small><strong>${esc(esquina)}</strong></div>
-          </div>
-          <button class="lot-btn" onclick="quoteLot('${model.id}','${esc(lot.id)}')">Cotizar este lote →</button>
-        </div>
-      </article>`;
-  }).join("");
-
-  const more=document.getElementById("moreLots");
-  more.style.display=list.length>state.lotsShown?"inline-block":"none";
-}
-
-
-function budgetMatches(){
-  const downAvailable=Number(document.getElementById("filterDownPayment").value)||0;
-  const zone=document.getElementById("filterZone").value;
-
-  const all=state.models.flatMap(model=>
-    model.available.map(lot=>{
-      const est=estimateDownPayment(model,lot);
-      const p=resolvePrice(model,lot);
-      return {model,lot,est,price:p};
-    })
-  ).filter(x=>{
-    if(zone!=="all" && !x.model.zones.some(z=>canon(z)===zone)) return false;
-    return x.est!==null && Number.isFinite(x.est);
-  });
-
-  const exact=downAvailable>0
-    ? all.filter(x=>x.est<=downAvailable)
-    : [];
-
-  exact.sort((a,b)=>b.est-a.est);
-
-  const closest=all
-    .filter(x=>downAvailable>0 && x.est>downAvailable)
-    .sort((a,b)=>a.est-b.est)
-    .slice(0,6);
-
-  return {downAvailable,exact,closest};
-}
-
-function renderBudgetSearch(){
-  const {downAvailable,exact,closest}=budgetMatches();
-  const section=document.getElementById("searchResultsSection");
-  const grid=document.getElementById("searchLotsGrid");
-  const count=document.getElementById("searchResultsCount");
-  const title=document.getElementById("searchResultsTitle");
-  const copy=document.getElementById("searchResultsText");
-
-  section.classList.add("show");
-
-  if(!(downAvailable>0)){
-    title.textContent="Indica cuánto puedes dar de enganche";
-    copy.textContent="Usaremos ese monto para mostrarte opciones que se ajusten a tu presupuesto.";
-    count.textContent="Sin búsqueda";
-    grid.innerHTML=`<div class="search-empty" style="grid-column:1/-1"><strong>Falta el monto de enganche</strong>Escribe una cantidad y pulsa “Buscar terrenos”.</div>`;
-    return;
-  }
-
-  const list=exact.length?exact:closest;
-  if(exact.length){
-    title.textContent=`Terrenos con enganche de hasta $${money(downAvailable)} USD`;
-    copy.textContent="Te mostramos primero las opciones que mejor se ajustan a tu presupuesto.";
-    count.textContent=`${exact.length} coincidencias`;
-  }else{
-    title.textContent=`No encontramos lotes con enganche de $${money(downAvailable)} USD`;
-    copy.textContent="Estas son las opciones disponibles más cercanas por encima de tu monto.";
-    count.textContent=closest.length?`${closest.length} opciones cercanas`:"0 resultados";
-  }
-
-  if(!list.length){
-    grid.innerHTML=`<div class="search-empty" style="grid-column:1/-1"><strong>No hay opciones disponibles en esta zona</strong>Prueba otra zona o un monto distinto.</div>`;
-    return;
-  }
-
-  grid.innerHTML=list.slice(0,12).map(({model,lot,est,price})=>{
-    const photoInfo=getLotPhoto(lot,model);
-    const photo=photoInfo.url;
-    const pct=price.ok&&Number(price.downPct)>0?`${money(price.downPct)}%`:"Consultar";
-    const talud=lot.tiene_talud===true?"Sí":lot.tiene_talud===false?"No":"Consultar";
-    const visual=photo
-      ? `<div class="search-lot-photo"><img src="${esc(photo)}" alt="" loading="lazy"><span class="search-photo-label">${photoInfo.type==="lote"?"Foto del lote":"Imagen del desarrollo"}</span></div>`
-      : `<div class="search-lot-photo no-photo"><div class="search-lot-no-photo"><div><strong>Mz ${esc(lot.manzana||"—")} · Lote ${esc(lot.lote||"—")}</strong><span>Sin fotografía cargada</span></div></div></div>`;
-
-    return `
-      <article class="search-lot">
-        ${visual}
-        <div class="search-lot-body">
-          <div class="search-lot-title">Lote ${esc(lot.lote||"—")}</div>
-          <div class="search-lot-dev">${esc(model.name)} · Mz ${esc(lot.manzana||"—")}</div>
-          <div class="search-lot-data">
-            <div><small>Medida</small><strong>${m2(lot.superficie_m2)}</strong></div>
-            <div><small>Enganche %</small><strong>${esc(pct)}</strong></div>
-            <div><small>Enganche estimado</small><strong>${est?`$${money(est)} USD`:"Consultar"}</strong></div>
-          </div>
-          <button onclick="quoteLot('${model.id}','${esc(lot.id)}')">Cotizar este lote →</button>
-        </div>
-      </article>`;
-  }).join("");
-}
-
-function applyFilters(){
-  const type=document.getElementById("filterType").value;
-  const zone=document.getElementById("filterZone").value;
-  const downAvailable=Number(document.getElementById("filterDownPayment").value)||null;
-
-  state.filtered=state.models.filter(m=>{
-    if(type!=="all" && m.type!==type) return false;
-    if(zone!=="all" && !m.zones.some(z=>canon(z)===zone)) return false;
-    if(downAvailable){const ok=m.available.some(l=>{const est=estimateDownPayment(m,l);return est!==null&&est<=downAvailable;});if(!ok)return false;}
-    return true;
-  });
-
-  state.filtered.sort((a,b)=>Number(a.soldOut)-Number(b.soldOut));
-
-  state.lotsShown=12;
-  renderDevelopments(state.filtered);
-  renderLots();
-
-  document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.type===type));
-}
-
-function mapUrlForModel(m){
-  if(m?.loc?.maps_url) return m.loc.maps_url;
-  const lat=Number(m?.loc?.latitud), lng=Number(m?.loc?.longitud);
-  if(Number.isFinite(lat) && Number.isFinite(lng)) return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-  return "";
-}
-
-function openMap(id){
-  const m=state.models.find(x=>x.id===id);
-  const url=mapUrlForModel(m);
-  if(url) window.open(url,"_blank","noopener");
-}
-
-function resetDevelopmentFilters(){
-  developmentFilters={currency:"USD",downPct:0,term:0,monthlyMin:"",monthlyMax:"",terrain:"all",areaMin:"",areaMax:"",search:""};
-  renderDevelopmentToolbar();
-  renderDevelopmentLots();
+  // Las imágenes del desarrollo quedan separadas de lotes, precotización y cotización.
+  return {url:"",type:"none"};
 }
 function setDevelopmentFilter(key,value,rerenderToolbar=false){
   developmentFilters[key]=value;
@@ -2199,7 +2004,7 @@ function openDevelopment(id){
   const address=m.loc?.direccion || "Consulta la ubicación desde el botón de mapa.";
   const cover=m.cover || "";
   const typeLabel=m.type==="costa"?"Costa":m.type==="campestre"?"Campestre":"Urbano";
-  const gallery=m.media.slice(0,5).map(x=>`<img src="${esc(x.public_url)}" alt="${esc(m.name)}" loading="lazy" onerror="devImageFallback(this)">`).join("");
+  const gallery=(Array.isArray(m.media)?m.media:[]).map(x=>`<img src="${esc(x.public_url)}" alt="${esc(m.name)}" loading="lazy" onerror="devImageFallback(this)">`).join("");
   document.getElementById("modalBody").innerHTML=`
     <div class="modal-hero">${cover?`<img src="${esc(cover)}" alt="${esc(m.name)}" onerror="devImageFallback(this)">`:`<div class="dev-photo-fallback"><strong>Imagen no disponible</strong></div>`}</div>
     <div class="modal-content">
@@ -2635,8 +2440,7 @@ load();
     const typeLabel=m.type==="costa"?"Costa":m.type==="campestre"?"Campestre":"Urbano";
     const amenities=Array.isArray(m.amenities)?m.amenities:[];
     const galleryRows=(Array.isArray(m.media)?m.media:[])
-      .filter(x=>x?.public_url && x.public_url!==cover)
-      .slice(0,6);
+      .filter(x=>x?.public_url && x.public_url!==cover);
     const gallery=galleryRows.map(x=>`<img src="${esc(x.public_url)}" alt="${esc(m.name)}" loading="lazy" onerror="devImageFallback(this)">`).join("");
     const mapUrl=mapUrlForModel(m);
     const mapEmbed=premiumEmbedUrl(m);
@@ -3514,6 +3318,91 @@ load();
 })();
 </script>
 <!-- /SEO_CITY_ROUTE_V44 -->
+
+
+<!-- CATALOGO_V48_DEVELOPMENT_MEDIA_CONTAIN -->
+<style id="catalogo-v48-development-media-contain-style">
+  #devGrid .dev-photo{
+    height:300px!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:12px!important;
+    background:linear-gradient(145deg,#eef3f2,#e3eceb)!important;
+    overflow:hidden!important;
+  }
+  #devGrid .dev-photo>img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    transform:none!important;
+    border-radius:15px!important;
+    background:#e8efee!important;
+  }
+
+  #devModal .modal-hero,
+  #devModal .premium-hero-media{
+    min-height:360px!important;
+    height:clamp(360px,50vw,560px)!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:16px!important;
+    background:linear-gradient(145deg,#edf3f2,#dfe9e8)!important;
+    overflow:hidden!important;
+  }
+  #devModal .modal-hero>img,
+  #devModal .premium-hero-media>img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    transform:none!important;
+    background:#e7eeee!important;
+    border-radius:18px!important;
+  }
+
+  #devModal .premium-gallery-shell .gallery,
+  #devModal .gallery{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr))!important;
+    grid-auto-rows:auto!important;
+    gap:14px!important;
+    align-items:stretch!important;
+  }
+  #devModal .premium-gallery-shell .gallery img,
+  #devModal .gallery img{
+    width:100%!important;
+    height:auto!important;
+    min-height:220px!important;
+    max-height:440px!important;
+    aspect-ratio:16/10!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    transform:none!important;
+    padding:8px!important;
+    border-radius:17px!important;
+    background:#e9efee!important;
+    border:1px solid rgba(16,58,69,.08)!important;
+  }
+  #devModal .gallery img:first-child{grid-row:auto!important}
+
+  #devGrid .dev-photo img[src*="#campestre-clean"],
+  #devModal .modal-hero img[src*="#campestre-clean"],
+  #devModal .premium-hero-media img[src*="#campestre-clean"],
+  #devModal .gallery img[src*="#campestre-clean"]{
+    object-fit:contain!important;
+    object-position:center!important;
+    transform:none!important;
+  }
+
+  @media(max-width:680px){
+    #devGrid .dev-photo{height:240px!important;padding:8px!important}
+    #devModal .modal-hero,#devModal .premium-hero-media{min-height:260px!important;height:340px!important;padding:10px!important}
+    #devModal .premium-gallery-shell .gallery,#devModal .gallery{grid-template-columns:1fr!important}
+    #devModal .premium-gallery-shell .gallery img,#devModal .gallery img{min-height:200px!important;max-height:360px!important}
+  }
+</style>
+<!-- /CATALOGO_V48_DEVELOPMENT_MEDIA_CONTAIN -->
 
 </body>
 </html>
