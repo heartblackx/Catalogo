@@ -1,0 +1,36 @@
+name: Export manual site
+
+on:
+  push:
+    branches:
+      - artifact-export
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build clean ZIP
+        shell: bash
+        run: |
+          mkdir -p export
+          cp index.html export/
+          [ -f favicon.png ] && cp favicon.png export/ || true
+          [ -f robots.txt ] && cp robots.txt export/ || true
+          [ -f sitemap.xml ] && cp sitemap.xml export/ || true
+          for d in assets admin-trafico tijuana rosarito ensenada; do
+            [ -d "$d" ] && cp -a "$d" export/
+          done
+          cd export
+          zip -r ../Terrenos-InvierteInteligente-ESTABLE.zip .
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: terrenos-estable-manual
+          path: Terrenos-InvierteInteligente-ESTABLE.zip
+          if-no-files-found: error
