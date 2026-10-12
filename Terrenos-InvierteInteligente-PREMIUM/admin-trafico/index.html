@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Panel de tráfico | Invierte Inteligente TJ</title>
+<style>
+:root{--bg:#f4f7f9;--card:#fff;--ink:#10232d;--muted:#6d7b84;--line:#dbe4e8;--brand:#0b5f78;--brand2:#0b3040;--ok:#0b7a53;--warn:#a66a00;--danger:#b93434;--soft:#eaf3f6}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}button,input{font:inherit}.hidden{display:none!important}.shell{max-width:1180px;margin:auto;padding:18px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}.brand{display:flex;align-items:center;gap:11px}.mark{width:44px;height:44px;border-radius:12px;background:var(--brand2);color:#fff;display:grid;place-items:center;font-weight:900}.brand h1{font-size:20px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;min-height:42px;cursor:pointer;color:var(--ink)}.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.btn.danger{color:var(--danger)}.status{font-size:12px;color:var(--muted);margin-bottom:14px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px}.kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.kpi .value{font-size:30px;font-weight:800;margin-top:7px}.kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}.section{margin-top:14px}.section h2{font-size:17px;margin:0 0 10px}.split{display:grid;grid-template-columns:1.3fr .7fr;gap:12px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}table{width:100%;border-collapse:collapse;min-width:650px}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}th{background:#f8fafb;color:#52626b;font-size:12px;position:sticky;top:0}tr:last-child td{border-bottom:0}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--soft);color:var(--brand2)}.badge.ok{background:#e7f6ef;color:var(--ok)}.badge.warn{background:#fff3da;color:var(--warn)}.sourceRow{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.sourceRow:last-child{border-bottom:0}.sourceRow b{font-size:15px}.muted{color:var(--muted)}.chart{display:flex;align-items:end;gap:5px;height:150px;padding-top:10px;overflow-x:auto}.barcol{min-width:18px;flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;height:100%}.bar{width:100%;max-width:24px;background:var(--brand);border-radius:5px 5px 2px 2px;min-height:2px}.barlabel{font-size:9px;color:var(--muted);margin-top:4px;white-space:nowrap}.loginWrap{min-height:72vh;display:grid;place-items:center;padding:18px}.login{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}.login h1{margin:0 0 6px;font-size:22px}.login p{margin:0 0 18px;color:var(--muted);font-size:14px}.field{margin:12px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:16px}.login .btn{width:100%;margin-top:8px}.error{margin-top:12px;color:var(--danger);font-size:13px}.toast{position:fixed;right:18px;bottom:18px;max-width:360px;background:var(--brand2);color:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 12px 30px #0003;z-index:50}.toast b{display:block;margin-bottom:3px}.mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.mini .item{padding:10px;border:1px solid var(--line);border-radius:10px}.mini .item b{display:block;font-size:18px}.empty{padding:18px;color:var(--muted);text-align:center}.phone{color:var(--brand);font-weight:700;text-decoration:none}details{font-size:12px;color:var(--muted)}summary{cursor:pointer;color:var(--brand)}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:520px){.shell{padding:12px}.grid{grid-template-columns:1fr 1fr}.kpi .value{font-size:25px}.brand h1{font-size:18px}.actions{width:100%}.actions .btn{flex:1}.mini{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="loginView" class="loginWrap">
+  <form id="loginForm" class="login">
+    <h1>Panel privado</h1>
+    <p>Tráfico, historial y citas de Invierte Inteligente TJ.</p>
+    <div class="field"><label for="phone">Teléfono de administrador</label><input id="phone" inputmode="tel" autocomplete="username" placeholder="663 458 1218" required></div>
+    <div class="field"><label for="password">Contraseña</label><input id="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn primary" type="submit">Entrar</button>
+    <div id="loginError" class="error hidden"></div>
+  </form>
+</div>
+
+<div id="appView" class="shell hidden">
+  <div class="top">
+    <div class="brand"><div class="mark">II</div><div><h1>Panel de tráfico</h1><p id="adminName">Invierte Inteligente TJ</p></div></div>
+    <div class="actions">
+      <button id="notifyBtn" class="btn" type="button">Activar avisos</button>
+      <button id="refreshBtn" class="btn primary" type="button">Actualizar</button>
+      <button id="logoutBtn" class="btn danger" type="button">Salir</button>
+    </div>
+  </div>
+  <div id="status" class="status">Cargando…</div>
+
+  <section class="section">
+    <h2>Últimos 3 días</h2>
+    <div class="grid">
+      <div class="card kpi"><div class="label">Visitas</div><div id="kVisits" class="value">0</div><div class="sub">Páginas vistas</div></div>
+      <div class="card kpi"><div class="label">Visitantes</div><div id="kVisitors" class="value">0</div><div class="sub">Aproximados únicos</div></div>
+      <div class="card kpi"><div class="label">Sesiones</div><div id="kSessions" class="value">0</div><div class="sub">Navegaciones</div></div>
+      <div class="card kpi"><div class="label">Citas</div><div id="kAppointments" class="value">0</div><div class="sub">Registradas</div></div>
+    </div>
+  </section>
+
+  <section class="section split">
+    <div class="card"><h2>Tráfico por fuente</h2><div id="sources"></div></div>
+    <div class="card"><h2>Trayectoria completa</h2><div class="mini">
+      <div class="item"><span class="muted">Visitas</span><b id="allVisits">0</b></div>
+      <div class="item"><span class="muted">Visitantes</span><b id="allVisitors">0</b></div>
+      <div class="item"><span class="muted">Sesiones</span><b id="allSessions">0</b></div>
+      <div class="item"><span class="muted">Citas</span><b id="allAppointments">0</b></div>
+    </div><p id="historyRange" class="muted" style="font-size:12px;margin:12px 0 0"></p></div>
+  </section>
+
+  <section class="section split">
+    <div class="card"><h2>Actividad · últimos 30 días</h2><div id="chart" class="chart"></div></div>
+    <div class="card"><h2>Ubicaciones y dispositivos</h2><div id="locations"></div><div id="devices" style="margin-top:10px"></div></div>
+  </section>
+
+  <section class="section">
+    <h2>Citas registradas</h2>
+    <div class="tablewrap"><table><thead><tr><th>Cliente</th><th>Terreno</th><th>Cita</th><th>Estado</th><th>Asesor</th><th>Registro</th><th>Detalle</th></tr></thead><tbody id="appointmentsBody"></tbody></table></div>
+  </section>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+(()=>{
+const SB='https://cisiancuphdkybkddwmq.supabase.co';
+const KEY='sb_publishable_ybtgC9Ocn1TownwXd0P3Pw_qaCSgaKe';
+const API=SB+'/functions/v1/dashboard-trafico-admin';
+const POLL=20000;
+let timer=null, current=null;
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString('es-MX');
+const dt=v=>v?new Intl.DateTimeFormat('es-MX',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Tijuana'}).format(new Date(v)):'—';
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function phoneEmail(raw){let d=String(raw||'').replace(/\D/g,'');if(d.length===10)d='52'+d;return 'u'+d+'@login.invierteinteligentetj.com'}
+function saveSession(s){localStorage.setItem('ii_dash_session',JSON.stringify(s))}
+function getSession(){try{return JSON.parse(localStorage.getItem('ii_dash_session')||'null')}catch{return null}}
+function clearSession(){localStorage.removeItem('ii_dash_session')}
+async function authPassword(phone,password){const emails=[phoneEmail(phone),phoneEmail(phone).replace('@login.','@')];let last='No fue posible iniciar sesión';for(const email of emails){const r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});const j=await r.json().catch(()=>({}));if(r.ok)return j;last=j.error_description||j.msg||j.message||last}throw new Error(last)}
+async function refreshSession(s){if(!s?.refresh_token)throw new Error('Sin sesión');const r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.refresh_token})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error('Sesión vencida');saveSession(j);return j}
+async function apiCall(retry=true){let s=getSession();if(!s)throw new Error('NO_SESSION');let r=await fetch(API,{headers:{apikey:KEY,Authorization:'Bearer '+s.access_token},cache:'no-store'});if(r.status===401&&retry){s=await refreshSession(s);return apiCall(false)}const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Error cargando datos');return j}
+function showLogin(){clearInterval(timer);$('appView').classList.add('hidden');$('loginView').classList.remove('hidden')}
+function showApp(){ $('loginView').classList.add('hidden');$('appView').classList.remove('hidden') }
+function toast(title,body){$('toast').innerHTML='<b>'+esc(title)+'</b>'+esc(body);$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),7000)}
+function notifyNew(data){const now=data.last_appointment_at||'';if(!now)return;const old=localStorage.getItem('ii_dash_last_cita');if(old&&new Date(now)>new Date(old)){const c=(data.appointments||[]).find(x=>new Date(x.created_at)>new Date(old))||(data.appointments||[])[0];const body=c?(c.nombre_cliente+' · '+(c.desarrollo||'Terreno')+' · '+dt(c.inicio_at)):'Se registró una nueva cita';toast('Nueva cita',body);if(localStorage.getItem('ii_dash_notify')==='1'&&'Notification'in window&&Notification.permission==='granted'){try{new Notification('Nueva cita · Invierte Inteligente',{body,tag:'cita-'+(c?.id||now)})}catch(_){}}}localStorage.setItem('ii_dash_last_cita',now)}
+function renderSources(rows){const names=['Facebook','Instagram','TikTok','Reddit','Google','Directo','Otras'];const map=Object.fromEntries((rows||[]).map(x=>[x.source_label,x]));$('sources').innerHTML=names.map(n=>{const x=map[n]||{};const dev=x.devices||{};const ds=Object.entries(dev).map(([k,v])=>k+': '+v).join(' · ');return '<div class="sourceRow"><span><b>'+n+'</b><br><span class="muted">'+esc(ds||'Sin actividad')+'</span></span><span><b>'+fmt(x.pageviews)+'</b><br><span class="muted">visitas</span></span><span><b>'+fmt(x.visitors)+'</b><br><span class="muted">personas</span></span><span><b>'+fmt(x.sessions)+'</b><br><span class="muted">sesiones</span></span></div>'}).join('')}
+function renderChart(rows){const a=rows||[];if(!a.length){$('chart').innerHTML='<div class="empty">Aún no hay historial suficiente.</div>';return}const max=Math.max(1,...a.map(x=>Number(x.pageviews||0)));$('chart').innerHTML=a.map(x=>{const h=Math.max(2,Math.round(Number(x.pageviews||0)/max*118));const label=String(x.dia||'').slice(5);return '<div class="barcol" title="'+esc(x.dia)+' · '+fmt(x.pageviews)+' visitas"><div class="bar" style="height:'+h+'px"></div><div class="barlabel">'+esc(label)+'</div></div>'}).join('')}
+function renderGeo(loc,dev){const ls=(loc||[]).slice(0,5).map(x=>'<div class="sourceRow"><span><b>'+esc(x.city)+'</b><br><span class="muted">'+esc(x.region)+' '+esc(x.country)+'</span></span><span><b>'+fmt(x.pageviews)+'</b><br><span class="muted">visitas</span></span><span><b>'+fmt(x.visitors)+'</b><br><span class="muted">personas</span></span><span></span></div>').join('');const ds=(dev||[]).map(x=>'<span class="badge" style="margin:3px">'+esc(x.device)+': '+fmt(x.pageviews)+'</span>').join('');$('locations').innerHTML=ls||'<div class="empty">Sin ubicaciones todavía.</div>';$('devices').innerHTML=ds}
+function renderAppointments(rows){const a=rows||[];$('appointmentsBody').innerHTML=a.length?a.map(c=>{const st=String(c.estado||'').toLowerCase();const cls=st==='confirmada'?'ok':st==='cancelada'?'warn':'';return '<tr><td><b>'+esc(c.nombre_cliente||'—')+'</b><br><a class="phone" href="tel:'+esc(c.telefono_cliente||'')+'">'+esc(c.telefono_cliente||'—')+'</a></td><td><b>'+esc(c.desarrollo||'—')+'</b></td><td>'+dt(c.inicio_at)+'</td><td><span class="badge '+cls+'">'+esc(c.estado||'—')+'</span></td><td>'+esc(c.asesor||'—')+'</td><td>'+dt(c.created_at)+'</td><td><details><summary>Ver</summary><div style="margin-top:7px">Origen: '+esc(c.origen||'—')+'<br>'+esc(c.notas||'Sin notas')+'</div></details></td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No hay citas registradas.</td></tr>'}
+function render(payload){current=payload.data;const d=current;notifyNew(d);$('adminName').textContent=(payload.admin?.nombre||'Administrador')+' · Invierte Inteligente TJ';$('kVisits').textContent=fmt(d.last3?.pageviews);$('kVisitors').textContent=fmt(d.last3?.visitors);$('kSessions').textContent=fmt(d.last3?.sessions);$('kAppointments').textContent=fmt(d.appointments_last3);$('allVisits').textContent=fmt(d.all_time?.pageviews);$('allVisitors').textContent=fmt(d.all_time?.visitors);$('allSessions').textContent=fmt(d.all_time?.sessions);$('allAppointments').textContent=fmt(d.appointments_all_time);$('historyRange').textContent=d.all_time?.first_visit?'Desde '+dt(d.all_time.first_visit)+' · Última visita '+dt(d.all_time.last_visit):'El contador todavía no registra visitas.';renderSources(d.last3_by_source);renderChart(d.daily30);renderGeo(d.last3_locations,d.last3_devices);renderAppointments(d.appointments);$('status').textContent='Actualizado '+new Intl.DateTimeFormat('es-MX',{timeStyle:'medium'}).format(new Date())+' · actualización automática cada 20 s'}
+async function load(){try{$('refreshBtn').disabled=true;const p=await apiCall();showApp();render(p)}catch(e){if(String(e.message).includes('NO_SESSION')||String(e.message).includes('Sesión')||String(e.message).includes('JWT'))showLogin();else{$('status').textContent='Error: '+e.message}}finally{$('refreshBtn').disabled=false}}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginError').classList.add('hidden');const btn=e.submitter;btn.disabled=true;btn.textContent='Entrando…';try{const s=await authPassword($('phone').value,$('password').value);saveSession(s);await load();clearInterval(timer);timer=setInterval(load,POLL)}catch(err){$('loginError').textContent=err.message;$('loginError').classList.remove('hidden')}finally{btn.disabled=false;btn.textContent='Entrar'}});
+$('refreshBtn').addEventListener('click',load);
+$('logoutBtn').addEventListener('click',()=>{clearSession();showLogin()});
+$('notifyBtn').addEventListener('click',async()=>{if(!('Notification'in window)){toast('Avisos no disponibles','Este navegador no permite notificaciones.');return}const p=await Notification.requestPermission();if(p==='granted'){localStorage.setItem('ii_dash_notify','1');$('notifyBtn').textContent='Avisos activados';toast('Avisos activados','Te avisaré si aparece una cita nueva mientras el navegador pueda recibir notificaciones.')}else{localStorage.removeItem('ii_dash_notify');$('notifyBtn').textContent='Activar avisos'}});
+if('Notification'in window&&Notification.permission==='granted'&&localStorage.getItem('ii_dash_notify')==='1')$('notifyBtn').textContent='Avisos activados';
+if(getSession()){load();timer=setInterval(load,POLL)}else showLogin();
+})();
+</script>
+</body>
+</html>
